@@ -908,9 +908,7 @@
         "x": 1070,
         "y": 180,
         "wires": [
-            [
-                "e74b0236f3965fee"
-            ]
+            []
         ]
     },
     {
@@ -953,16 +951,11 @@
         "x": 450,
         "y": 160,
         "wires": [
-            [
-                "738e81e8dcb99197"
-            ],
+            [],
             [
                 "d7b8763986e7cd06"
             ],
-            [
-                "abb70d9df99f8eb3",
-                "064ec667edcefcd1"
-            ]
+            []
         ]
     },
     {
@@ -972,8 +965,8 @@
         "group": "81867aea22c8ac4c",
         "page": "",
         "ui": "",
-        "name": "KPIs en Tiempo Real",
-        "order": 1,
+        "name": "Alerta de Desviación 2",
+        "order": 2,
         "width": 0,
         "height": 0,
         "format": "<style>\n    .dashboard-container {\n        background: white;\n        border-radius: 16px;\n        padding: 24px;\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        font-family: 'Segoe UI', system-ui, sans-serif;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .kpi-header {\n        font-size: 1.3em;\n        font-weight: 800;\n        color: #1e293b;\n        margin-bottom: 24px;\n        padding-bottom: 16px;\n        border-bottom: 3px solid #f1f5f9;\n        display: flex;\n        align-items: center;\n        gap: 12px;\n        letter-spacing: -0.5px;\n    }\n    \n    .kpi-grid {\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n        gap: 20px;\n        margin-bottom: 24px;\n    }\n    \n    .kpi-card {\n        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);\n        padding: 20px;\n        border-radius: 12px;\n        border-left: 5px solid #3b82f6;\n        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        border: 1px solid #f1f5f9;\n    }\n    \n    .kpi-card:hover {\n        transform: translateY(-4px);\n        box-shadow: 0 8px 16px rgba(0,0,0,0.12);\n    }\n    \n    .kpi-card.meta { border-left-color: #10b981; }\n    .kpi-card.real { border-left-color: #f59e0b; }\n    .kpi-card.acum { border-left-color: #8b5cf6; }\n    \n    .kpi-label {\n        font-size: 0.9em;\n        color: #64748b;\n        font-weight: 700;\n        text-transform: uppercase;\n        letter-spacing: 0.8px;\n        margin-bottom: 8px;\n    }\n    \n    .kpi-value {\n        font-size: 1.8em;\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        letter-spacing: -1px;\n    }\n    \n    .progress-section {\n        margin-top: 24px;\n        background: #f8fafc;\n        padding: 20px;\n        border-radius: 12px;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .progress-label {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 10px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n    }\n    \n    .progress-bar {\n        background: #e2e8f0;\n        border-radius: 12px;\n        height: 16px;\n        overflow: hidden;\n        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);\n    }\n    \n    .progress-fill {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 3s infinite;\n    }\n    \n    .turno-info {\n        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);\n        padding: 16px 20px;\n        border-radius: 12px;\n        margin-bottom: 20px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n        border: 1px solid #e2e8f0;\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n</style>\n\n<div class=\"dashboard-container\">\n    <div class=\"kpi-header\">\n        📊 KPIs EN TIEMPO REAL\n    </div>\n    \n    <div v-if=\"msg.payload\">\n        <div class=\"turno-info\">\n            <strong>Turno {{msg.payload.turno}}</strong> | Hora {{msg.payload.hora}}/8 | Staffing: {{msg.payload.staffing}}\n        </div>\n        \n        <div class=\"kpi-grid\">\n            <div class=\"kpi-card meta\">\n                <div class=\"kpi-label\">Meta por Hora</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_hora}}</div>\n            </div>\n            <div class=\"kpi-card real\">\n                <div class=\"kpi-label\">Producción Actual</div>\n                <div class=\"kpi-value\">{{msg.payload.real_hora}}</div>\n            </div>\n            <div class=\"kpi-card acum\">\n                <div class=\"kpi-label\">Meta Acumulada</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</div>\n            </div>\n            <div class=\"kpi-card\">\n                <div class=\"kpi-label\">Real Acumulado</div>\n                <div class=\"kpi-value\">{{msg.payload.real_turno_acum}}</div>\n            </div>\n        </div>\n        \n        <div class=\"progress-section\">\n            <div class=\"progress-label\">\n                <span>Progreso del Turno</span>\n                <span>{{Math.round((msg.payload.hora/8)*100)}}%</span>\n            </div>\n            <div class=\"progress-bar\">\n                <div class=\"progress-fill\" :style=\"{ width: (msg.payload.hora/8)*100 + '%' }\"></div>\n            </div>\n        </div>\n    </div>\n    <div v-else>\n        <div style=\"text-align: center; color: #64748b; padding: 40px;\">\n            <div style=\"font-size: 3em; margin-bottom: 16px;\">⏳</div>\n            Esperando datos de simulación...\n        </div>\n    </div>\n</div>",
@@ -982,10 +975,11 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "name": "Alerta de Desviación 2",
         "x": 1320,
         "y": 180,
-        "wires": []
+        "wires": [
+            []
+        ]
     },
     {
         "id": "696c5cc2febe827b",
