@@ -699,6 +699,123 @@
         ]
     },
     {
+        "id": "82012bbf1c44582a",
+        "type": "inject",
+        "z": "ba2c364934eb086e",
+        "name": "Simular 1 Hora (cada 5 seg)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "tick",
+        "payloadType": "str",
+        "x": 200,
+        "y": 160,
+        "wires": [
+            [
+                "e1c690f8c7e4b85e"
+            ]
+        ]
+    },
+    {
+        "id": "nuevo_staffing_input",
+        "type": "ui-number-input",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Parámetro: Staffing",
+        "label": "👥 Personal (Staffing):",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 1,
+        "max": 10,
+        "step": 1,
+        "tooltip": "Número de trabajadores asignados",
+        "passthru": true,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "input-modern",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 200,
+        "y": 300,
+        "wires": [
+            [
+                "7b621d826eac247d"
+            ]
+        ]
+    },
+    {
+        "id": "1650d35ca50437b4",
+        "type": "ui-number-input",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Parámetro: Meta por Hora",
+        "label": "🎯 Meta por Hora (por celda):",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 1,
+        "max": 20,
+        "step": 1,
+        "tooltip": "Establece la meta de producción por hora para cada celda",
+        "passthru": true,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "input-modern",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 200,
+        "y": 360,
+        "wires": [
+            [
+                "14f5248e9d96fc36"
+            ]
+        ]
+    },
+    {
+        "id": "agregar_celda_btn",
+        "type": "ui-button",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Agregar Celda",
+        "label": "➕ Agregar Celda",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "tooltip": "Agregar una nueva celda de trabajo",
+        "color": "btn-success",
+        "className": "btn-modern",
+        "icon": "fa-plus",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "agregar_celda",
+        "topicType": "msg",
+        "x": 200,
+        "y": 420,
+        "wires": [
+            [
+                "manejar_agregar_celda"
+            ]
+        ]
+    },
+    {
         "id": "82f9eb155cb56341",
         "type": "ui-notification",
         "z": "ba2c364934eb086e",
@@ -843,31 +960,6 @@
         ]
     },
     {
-        "id": "82012bbf1c44582a",
-        "type": "inject",
-        "z": "ba2c364934eb086e",
-        "name": "Simular 1 Hora (cada 5 seg)",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "5",
-        "crontab": "",
-        "once": true,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "tick",
-        "payloadType": "str",
-        "x": 200,
-        "y": 160,
-        "wires": [
-            [
-                "e1c690f8c7e4b85e"
-            ]
-        ]
-    },
-    {
         "id": "e1c690f8c7e4b85e",
         "type": "function",
         "z": "ba2c364934eb086e",
@@ -941,72 +1033,6 @@
         ]
     },
     {
-        "id": "nuevo_staffing_input",
-        "type": "ui-number-input",
-        "z": "ba2c364934eb086e",
-        "group": "dff97118a2e91311",
-        "name": "Parámetro: Staffing",
-        "label": "👥 Personal (Staffing):",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "topic": "topic",
-        "topicType": "msg",
-        "min": 1,
-        "max": 10,
-        "step": 1,
-        "tooltip": "Número de trabajadores asignados",
-        "passthru": true,
-        "sendOnBlur": true,
-        "sendOnEnter": true,
-        "className": "input-modern",
-        "clearable": false,
-        "icon": "",
-        "iconPosition": "left",
-        "iconInnerPosition": "inside",
-        "spinner": "default",
-        "x": 200,
-        "y": 300,
-        "wires": [
-            [
-                "7b621d826eac247d"
-            ]
-        ]
-    },
-    {
-        "id": "1650d35ca50437b4",
-        "type": "ui-number-input",
-        "z": "ba2c364934eb086e",
-        "group": "dff97118a2e91311",
-        "name": "Parámetro: Meta por Hora",
-        "label": "🎯 Meta por Hora (por celda):",
-        "order": 2,
-        "width": 0,
-        "height": 0,
-        "topic": "topic",
-        "topicType": "msg",
-        "min": 1,
-        "max": 20,
-        "step": 1,
-        "tooltip": "Establece la meta de producción por hora para cada celda",
-        "passthru": true,
-        "sendOnBlur": true,
-        "sendOnEnter": true,
-        "className": "input-modern",
-        "clearable": false,
-        "icon": "",
-        "iconPosition": "left",
-        "iconInnerPosition": "inside",
-        "spinner": "default",
-        "x": 200,
-        "y": 360,
-        "wires": [
-            [
-                "14f5248e9d96fc36"
-            ]
-        ]
-    },
-    {
         "id": "6ccd8ea09ec38a00",
         "type": "function",
         "z": "ba2c364934eb086e",
@@ -1074,32 +1100,6 @@
         "y": 360,
         "wires": [
             []
-        ]
-    },
-    {
-        "id": "agregar_celda_btn",
-        "type": "ui-button",
-        "z": "ba2c364934eb086e",
-        "group": "dff97118a2e91311",
-        "name": "Agregar Celda",
-        "label": "➕ Agregar Celda",
-        "order": 3,
-        "width": 0,
-        "height": 0,
-        "tooltip": "Agregar una nueva celda de trabajo",
-        "color": "btn-success",
-        "className": "btn-modern",
-        "icon": "fa-plus",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "agregar_celda",
-        "topicType": "msg",
-        "x": 200,
-        "y": 420,
-        "wires": [
-            [
-                "manejar_agregar_celda"
-            ]
         ]
     },
     {
