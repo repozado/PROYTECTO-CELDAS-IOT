@@ -905,7 +905,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1020,
+        "x": 1070,
         "y": 180,
         "wires": [
             [
@@ -931,7 +931,7 @@
         "raw": false,
         "className": "",
         "name": "Alerta de Desviación 2",
-        "x": 1260,
+        "x": 1320,
         "y": 180,
         "wires": []
     },
