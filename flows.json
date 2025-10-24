@@ -699,7 +699,29 @@
         ]
     },
     {
-        "id": "bccbedf51a20ae0c",
+        "id": "f544d8f77f4b1578",
+        "type": "ui-notification",
+        "z": "ba2c364934eb086e",
+        "ui": "9477a706cabb673d",
+        "position": "top right",
+        "colorDefault": false,
+        "color": "#ef4444",
+        "displayTime": "8",
+        "showCountdown": true,
+        "outputs": 0,
+        "allowDismiss": true,
+        "dismissText": "Cerrar",
+        "allowConfirm": false,
+        "confirmText": "Confirm",
+        "raw": true,
+        "className": "modern-notification",
+        "name": "Alerta de Desviación",
+        "x": 1260,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "738e81e8dcb99197",
         "type": "ui-template",
         "z": "ba2c364934eb086e",
         "group": "2ae92a9af38a7961",
@@ -709,20 +731,22 @@
         "order": 1,
         "width": 0,
         "height": 0,
-        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));\n        gap: 15px;\n        padding: 20px;\n        background: #f8fafc;\n        border-radius: 12px;\n    }\n    .celda {\n        border: 1px solid #e2e8f0;\n        border-radius: 12px;\n        padding: 15px;\n        text-align: center;\n        color: #2d3748;\n        transition: all 0.3s ease;\n        background: white;\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        position: relative;\n        overflow: hidden;\n    }\n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 4px;\n    }\n    .celda-title {\n        font-weight: 700;\n        font-size: 1.1em;\n        margin-bottom: 12px;\n        padding-bottom: 8px;\n        border-bottom: 2px solid #f1f5f9;\n        color: #1e293b;\n    }\n    .celda-kpi {\n        font-size: 0.85em;\n        text-align: left;\n        margin-top: 6px;\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n    }\n    .celda-kpi b {\n        color: #64748b;\n        font-weight: 600;\n    }\n    \n    /* Estados con colores modernos */\n    .celda-estado-trabajando::before { background: linear-gradient(135deg, #10b981, #059669); }\n    .celda-estado-trabajando { border-top: 4px solid #10b981; }\n    \n    .celda-estado-parada::before { background: linear-gradient(135deg, #ef4444, #dc2626); }\n    .celda-estado-parada { border-top: 4px solid #ef4444; }\n    \n    .celda-estado-esperando::before { background: linear-gradient(135deg, #f59e0b, #d97706); }\n    .celda-estado-esperando { border-top: 4px solid #f59e0b; }\n    \n    .celda-estado-sin_personal::before { background: linear-gradient(135deg, #6b7280, #4b5563); }\n    .celda-estado-sin_personal { border-top: 4px solid #6b7280; }\n\n    /* Barra de utilización mejorada */\n    .util-bar-container {\n        background-color: #e2e8f0;\n        border-radius: 8px;\n        height: 16px;\n        width: 100%;\n        margin-top: 8px;\n        border: 1px solid #cbd5e1;\n        overflow: hidden;\n        position: relative;\n    }\n    .util-bar-value {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8);\n        height: 100%;\n        transition: width 0.5s ease;\n        border-radius: 6px;\n    }\n    \n    /* Imágenes de estado mejoradas */\n    .estado-imagen {\n        width: 48px;\n        height: 48px;\n        margin: 0 auto 10px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        filter: brightness(0.9);\n    }\n    .imagen-trabajando { background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064039.png'); }\n    .imagen-parada { background-image: url('https://cdn-icons-png.flaticon.com/512/458/458594.png'); }\n    .imagen-esperando { background-image: url('https://cdn-icons-png.flaticon.com/512/3305/3305803.png'); }\n    .imagen-sin_personal { background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828843.png'); }\n    \n    .estado-texto {\n        font-size: 0.75em;\n        font-weight: 700;\n        margin-bottom: 8px;\n        padding: 4px 8px;\n        border-radius: 6px;\n        text-transform: uppercase;\n        letter-spacing: 0.5px;\n    }\n    .estado-trabajando { background: #d1fae5; color: #065f46; }\n    .estado-parada { background: #fee2e2; color: #991b1b; }\n    .estado-esperando { background: #fef3c7; color: #92400e; }\n    .estado-sin_personal { background: #f1f5f9; color: #374151; }\n    \n    .valor-destacado {\n        font-weight: 700;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n    }\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n        \n        <!-- Imagen representativa del estado -->\n        <div class=\"estado-imagen\" :class=\"'imagen-' + celda.estado\"></div>\n        <div class=\"estado-texto\" :class=\"'estado-' + celda.estado\">{{celda.estado.toUpperCase()}}</div>\n        \n        <div class=\"celda-kpi\">\n            <b>Prod/h:</b>\n            <span class=\"valor-destacado\">{{celda.unid_ok_hora}}</span>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Util:</b>\n            <span class=\"valor-destacado\">{{celda.utilizacion.toFixed(1)}}%</span>\n        </div>\n        <div class=\"util-bar-container\">\n            <div class=\"util-bar-value\" :style=\"{ width: celda.utilizacion.toFixed(1) + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Espera:</b>\n            <span class=\"valor-destacado\">{{celda.tiempo_espera}}h</span>\n        </div>\n    </div>\n</div>",
+        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));\n        gap: 20px;\n        padding: 20px;\n        background: #f8fafc;\n        border-radius: 16px;\n        min-height: 400px;\n    }\n    \n    .celda {\n        border: 2px solid #e2e8f0;\n        border-radius: 16px;\n        padding: 20px;\n        text-align: center;\n        color: #2d3748;\n        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);\n        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        position: relative;\n        overflow: hidden;\n        cursor: pointer;\n    }\n    \n    .celda:hover {\n        transform: translateY(-8px);\n        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);\n    }\n    \n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 6px;\n        transition: all 0.4s ease;\n    }\n    \n    .celda-title {\n        font-weight: 800;\n        font-size: 1.2em;\n        margin-bottom: 16px;\n        padding-bottom: 12px;\n        border-bottom: 2px solid #f1f5f9;\n        color: #1e293b;\n        letter-spacing: -0.5px;\n    }\n    \n    .celda-kpi {\n        font-size: 0.9em;\n        text-align: left;\n        margin-top: 8px;\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n        padding: 4px 0;\n    }\n    \n    .celda-kpi b {\n        color: #64748b;\n        font-weight: 600;\n    }\n    \n    /* Estados con animaciones */\n    .celda-estado-trabajando::before { \n        background: linear-gradient(135deg, #10b981, #059669);\n        animation: pulse-green 2s infinite;\n    }\n    .celda-estado-trabajando { \n        border-top: 6px solid #10b981;\n        animation: glow-green 3s ease-in-out infinite alternate;\n    }\n    \n    .celda-estado-parada::before { \n        background: linear-gradient(135deg, #ef4444, #dc2626);\n        animation: pulse-red 2s infinite;\n    }\n    .celda-estado-parada { \n        border-top: 6px solid #ef4444;\n    }\n    \n    .celda-estado-esperando::before { \n        background: linear-gradient(135deg, #f59e0b, #d97706);\n        animation: pulse-orange 2s infinite;\n    }\n    .celda-estado-esperando { \n        border-top: 6px solid #f59e0b;\n    }\n    \n    .celda-estado-sin_personal::before { \n        background: linear-gradient(135deg, #6b7280, #4b5563);\n    }\n    .celda-estado-sin_personal { \n        border-top: 6px solid #6b7280;\n    }\n\n    /* Barra de utilización mejorada */\n    .util-bar-container {\n        background-color: #e2e8f0;\n        border-radius: 12px;\n        height: 20px;\n        width: 100%;\n        margin-top: 12px;\n        border: 1px solid #cbd5e1;\n        overflow: hidden;\n        position: relative;\n    }\n    \n    .util-bar-value {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 2s infinite;\n    }\n    \n    /* Imágenes de estado mejoradas */\n    .estado-imagen {\n        width: 64px;\n        height: 64px;\n        margin: 0 auto 15px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        filter: brightness(0.9);\n        transition: transform 0.3s ease;\n    }\n    \n    .celda:hover .estado-imagen {\n        transform: scale(1.1);\n    }\n    \n    .imagen-trabajando { background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064039.png'); }\n    .imagen-parada { background-image: url('https://cdn-icons-png.flaticon.com/512/458/458594.png'); }\n    .imagen-esperando { background-image: url('https://cdn-icons-png.flaticon.com/512/3305/3305803.png'); }\n    .imagen-sin_personal { background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828843.png'); }\n    \n    .estado-texto {\n        font-size: 0.8em;\n        font-weight: 800;\n        margin-bottom: 12px;\n        padding: 6px 12px;\n        border-radius: 8px;\n        text-transform: uppercase;\n        letter-spacing: 1px;\n        transition: all 0.3s ease;\n    }\n    \n    .estado-trabajando { background: #d1fae5; color: #065f46; }\n    .estado-parada { background: #fee2e2; color: #991b1b; }\n    .estado-esperando { background: #fef3c7; color: #92400e; }\n    .estado-sin_personal { background: #f1f5f9; color: #374151; }\n    \n    .valor-destacado {\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        font-size: 1.1em;\n    }\n    \n    /* Animaciones */\n    @keyframes pulse-green {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.7; }\n    }\n    \n    @keyframes pulse-red {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.6; }\n    }\n    \n    @keyframes pulse-orange {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.7; }\n    }\n    \n    @keyframes glow-green {\n        0% { box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06); }\n        100% { box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2); }\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n    \n    /* Controles de celdas */\n    .celda-controls {\n        margin-top: 15px;\n        padding-top: 15px;\n        border-top: 1px solid #f1f5f9;\n    }\n    \n    .btn-eliminar {\n        background: linear-gradient(135deg, #ef4444, #dc2626);\n        color: white;\n        border: none;\n        padding: 6px 12px;\n        border-radius: 8px;\n        font-size: 0.8em;\n        font-weight: 600;\n        cursor: pointer;\n        transition: all 0.3s ease;\n    }\n    \n    .btn-eliminar:hover {\n        transform: scale(1.05);\n        box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);\n    }\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n        \n        <!-- Imagen representativa del estado -->\n        <div class=\"estado-imagen\" :class=\"'imagen-' + celda.estado\"></div>\n        <div class=\"estado-texto\" :class=\"'estado-' + celda.estado\">{{celda.estado.toUpperCase()}}</div>\n        \n        <div class=\"celda-kpi\">\n            <b>Prod/h:</b>\n            <span class=\"valor-destacado\">{{celda.unid_ok_hora}}</span>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Util:</b>\n            <span class=\"valor-destacado\">{{celda.utilizacion.toFixed(1)}}%</span>\n        </div>\n        <div class=\"util-bar-container\">\n            <div class=\"util-bar-value\" :style=\"{ width: Math.min(celda.utilizacion, 100).toFixed(1) + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Espera:</b>\n            <span class=\"valor-destacado\">{{celda.tiempo_espera}}h</span>\n        </div>\n        \n        <div class=\"celda-controls\">\n            <button class=\"btn-eliminar\" @click=\"eliminarCelda(celda.id)\">Eliminar</button>\n        </div>\n    </div>\n</div>\n\n<script>\nexport default {\n    methods: {\n        eliminarCelda(id) {\n            this.send({payload: {action: 'eliminar', id: id}});\n        }\n    }\n}\n</script>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 850,
-        "y": 400,
+        "x": 810,
+        "y": 80,
         "wires": [
-            []
+            [
+                "manejar_eliminar_celda"
+            ]
         ]
     },
     {
-        "id": "a74dea6555fb9a99",
+        "id": "7cab60128b93b30d",
         "type": "ui-chart",
         "z": "ba2c364934eb086e",
         "group": "db6adb7ea7e9c1ec",
@@ -747,7 +771,7 @@
         "ymax": "",
         "bins": "",
         "stackSeries": false,
-        "pointRadius": 4,
+        "pointRadius": 6,
         "showLegend": true,
         "removeOlder": "10",
         "removeOlderUnit": "points",
@@ -764,21 +788,21 @@
         ],
         "textColorDefault": false,
         "gridColor": [
-            "#f1f5f9"
+            "#f8fafc"
         ],
         "gridColorDefault": false,
         "width": "6",
         "height": "4",
-        "className": "chart-minimalist",
+        "className": "chart-modern",
         "interpolation": "monotone",
-        "x": 1070,
-        "y": 620,
+        "x": 1010,
+        "y": 320,
         "wires": [
             []
         ]
     },
     {
-        "id": "485c99aba738de78",
+        "id": "050f7ac0b7945f8f",
         "type": "change",
         "z": "ba2c364934eb086e",
         "name": "Preparar Msg de Alerta",
@@ -796,6 +820,13 @@
                 "pt": "msg",
                 "to": "Alerta de Producción",
                 "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "className",
+                "pt": "msg",
+                "to": "payload.hubo_desviacion ? 'alerta-error' : 'alerta-success'",
+                "tot": "jsonata"
             }
         ],
         "action": "",
@@ -803,38 +834,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1070,
-        "y": 520,
+        "x": 1010,
+        "y": 220,
         "wires": [
             [
-                "82f9eb155cb56341"
+                "f544d8f77f4b1578"
             ]
         ]
     },
     {
-        "id": "82f9eb155cb56341",
-        "type": "ui-notification",
-        "z": "ba2c364934eb086e",
-        "ui": "9477a706cabb673d",
-        "position": "top right",
-        "colorDefault": false,
-        "color": "#ef4444",
-        "displayTime": "6",
-        "showCountdown": true,
-        "outputs": 0,
-        "allowDismiss": true,
-        "dismissText": "Cerrar",
-        "allowConfirm": false,
-        "confirmText": "Confirm",
-        "raw": false,
-        "className": "notification-modern",
-        "name": "Alerta de Desviación",
-        "x": 1320,
-        "y": 520,
-        "wires": []
-    },
-    {
-        "id": "82012bbf1c44582a",
+        "id": "2ab3a0cd95ee8936",
         "type": "inject",
         "z": "ba2c364934eb086e",
         "name": "Simular 1 Hora (cada 5 seg)",
@@ -850,16 +859,16 @@
         "topic": "",
         "payload": "tick",
         "payloadType": "str",
-        "x": 220,
-        "y": 460,
+        "x": 160,
+        "y": 160,
         "wires": [
             [
-                "e1c690f8c7e4b85e"
+                "ef31ea9b8cf3d64b"
             ]
         ]
     },
     {
-        "id": "e1c690f8c7e4b85e",
+        "id": "ef31ea9b8cf3d64b",
         "type": "function",
         "z": "ba2c364934eb086e",
         "name": "Motor de Simulación (Gemelo Digital)",
@@ -870,23 +879,23 @@
         "initialize": "// Código de inicialización (opcional)\nflow.set(\"celdas\", undefined);\nflow.set(\"estado_sim\", undefined);\nflow.set(\"staffing\", 3);\nflow.set(\"meta_hora\", 5);",
         "finalize": "",
         "libs": [],
-        "x": 510,
-        "y": 460,
+        "x": 450,
+        "y": 160,
         "wires": [
             [
-                "bccbedf51a20ae0c"
+                "738e81e8dcb99197"
             ],
             [
-                "edc2d2cbdecc5ee8"
+                "d7b8763986e7cd06"
             ],
             [
-                "6ad831d3dd815a8d",
-                "6ccd8ea09ec38a00"
+                "abb70d9df99f8eb3",
+                "064ec667edcefcd1"
             ]
         ]
     },
     {
-        "id": "edc2d2cbdecc5ee8",
+        "id": "d7b8763986e7cd06",
         "type": "ui-template",
         "z": "ba2c364934eb086e",
         "group": "81867aea22c8ac4c",
@@ -896,20 +905,20 @@
         "order": 1,
         "width": 0,
         "height": 0,
-        "format": "<style>\n    .dashboard-container {\n        background: white;\n        border-radius: 12px;\n        padding: 20px;\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        font-family: 'Segoe UI', system-ui, sans-serif;\n    }\n    .kpi-header {\n        font-size: 1.2em;\n        font-weight: 700;\n        color: #1e293b;\n        margin-bottom: 20px;\n        padding-bottom: 12px;\n        border-bottom: 2px solid #f1f5f9;\n        display: flex;\n        align-items: center;\n        gap: 10px;\n    }\n    .kpi-grid {\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));\n        gap: 16px;\n        margin-bottom: 20px;\n    }\n    .kpi-card {\n        background: #f8fafc;\n        padding: 16px;\n        border-radius: 8px;\n        border-left: 4px solid #3b82f6;\n        transition: transform 0.2s ease;\n    }\n    .kpi-card:hover {\n        transform: translateY(-2px);\n    }\n    .kpi-card.meta { border-left-color: #10b981; }\n    .kpi-card.real { border-left-color: #f59e0b; }\n    .kpi-card.acum { border-left-color: #8b5cf6; }\n    \n    .kpi-label {\n        font-size: 0.85em;\n        color: #64748b;\n        font-weight: 600;\n        text-transform: uppercase;\n        letter-spacing: 0.5px;\n        margin-bottom: 6px;\n    }\n    .kpi-value {\n        font-size: 1.5em;\n        font-weight: 700;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n    }\n    .progress-section {\n        margin-top: 20px;\n    }\n    .progress-label {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 6px;\n        font-size: 0.9em;\n        color: #475569;\n    }\n    .progress-bar {\n        background: #e2e8f0;\n        border-radius: 8px;\n        height: 12px;\n        overflow: hidden;\n    }\n    .progress-fill {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8);\n        height: 100%;\n        transition: width 0.5s ease;\n        border-radius: 8px;\n    }\n    .turno-info {\n        background: #f1f5f9;\n        padding: 12px 16px;\n        border-radius: 8px;\n        margin-bottom: 16px;\n        font-size: 0.9em;\n        color: #475569;\n    }\n</style>\n\n<div class=\"dashboard-container\">\n    <div class=\"kpi-header\">\n        📊 KPIs EN TIEMPO REAL\n    </div>\n    \n    <div v-if=\"msg.payload\">\n        <div class=\"turno-info\">\n            <strong>Turno {{msg.payload.turno}}</strong> | Hora {{msg.payload.hora}}/8 | Staffing: {{msg.payload.staffing}}\n        </div>\n        \n        <div class=\"kpi-grid\">\n            <div class=\"kpi-card meta\">\n                <div class=\"kpi-label\">Meta por Hora</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_hora}}</div>\n            </div>\n            <div class=\"kpi-card real\">\n                <div class=\"kpi-label\">Producción Actual</div>\n                <div class=\"kpi-value\">{{msg.payload.real_hora}}</div>\n            </div>\n            <div class=\"kpi-card acum\">\n                <div class=\"kpi-label\">Meta Acumulada</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</div>\n            </div>\n            <div class=\"kpi-card\">\n                <div class=\"kpi-label\">Real Acumulado</div>\n                <div class=\"kpi-value\">{{msg.payload.real_turno_acum}}</div>\n            </div>\n        </div>\n        \n        <div class=\"progress-section\">\n            <div class=\"progress-label\">\n                <span>Progreso del Turno</span>\n                <span>{{Math.round((msg.payload.hora/8)*100)}}%</span>\n            </div>\n            <div class=\"progress-bar\">\n                <div class=\"progress-fill\" :style=\"{ width: (msg.payload.hora/8)*100 + '%' }\"></div>\n            </div>\n        </div>\n    </div>\n    <div v-else>\n        <div style=\"text-align: center; color: #64748b; padding: 40px;\">\n            Esperando datos de simulación...\n        </div>\n    </div>\n</div>",
+        "format": "<style>\n    .dashboard-container {\n        background: white;\n        border-radius: 16px;\n        padding: 24px;\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        font-family: 'Segoe UI', system-ui, sans-serif;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .kpi-header {\n        font-size: 1.3em;\n        font-weight: 800;\n        color: #1e293b;\n        margin-bottom: 24px;\n        padding-bottom: 16px;\n        border-bottom: 3px solid #f1f5f9;\n        display: flex;\n        align-items: center;\n        gap: 12px;\n        letter-spacing: -0.5px;\n    }\n    \n    .kpi-grid {\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n        gap: 20px;\n        margin-bottom: 24px;\n    }\n    \n    .kpi-card {\n        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);\n        padding: 20px;\n        border-radius: 12px;\n        border-left: 5px solid #3b82f6;\n        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        border: 1px solid #f1f5f9;\n    }\n    \n    .kpi-card:hover {\n        transform: translateY(-4px);\n        box-shadow: 0 8px 16px rgba(0,0,0,0.12);\n    }\n    \n    .kpi-card.meta { border-left-color: #10b981; }\n    .kpi-card.real { border-left-color: #f59e0b; }\n    .kpi-card.acum { border-left-color: #8b5cf6; }\n    \n    .kpi-label {\n        font-size: 0.9em;\n        color: #64748b;\n        font-weight: 700;\n        text-transform: uppercase;\n        letter-spacing: 0.8px;\n        margin-bottom: 8px;\n    }\n    \n    .kpi-value {\n        font-size: 1.8em;\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        letter-spacing: -1px;\n    }\n    \n    .progress-section {\n        margin-top: 24px;\n        background: #f8fafc;\n        padding: 20px;\n        border-radius: 12px;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .progress-label {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 10px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n    }\n    \n    .progress-bar {\n        background: #e2e8f0;\n        border-radius: 12px;\n        height: 16px;\n        overflow: hidden;\n        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);\n    }\n    \n    .progress-fill {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 3s infinite;\n    }\n    \n    .turno-info {\n        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);\n        padding: 16px 20px;\n        border-radius: 12px;\n        margin-bottom: 20px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n        border: 1px solid #e2e8f0;\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n</style>\n\n<div class=\"dashboard-container\">\n    <div class=\"kpi-header\">\n        📊 KPIs EN TIEMPO REAL\n    </div>\n    \n    <div v-if=\"msg.payload\">\n        <div class=\"turno-info\">\n            <strong>Turno {{msg.payload.turno}}</strong> | Hora {{msg.payload.hora}}/8 | Staffing: {{msg.payload.staffing}}\n        </div>\n        \n        <div class=\"kpi-grid\">\n            <div class=\"kpi-card meta\">\n                <div class=\"kpi-label\">Meta por Hora</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_hora}}</div>\n            </div>\n            <div class=\"kpi-card real\">\n                <div class=\"kpi-label\">Producción Actual</div>\n                <div class=\"kpi-value\">{{msg.payload.real_hora}}</div>\n            </div>\n            <div class=\"kpi-card acum\">\n                <div class=\"kpi-label\">Meta Acumulada</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</div>\n            </div>\n            <div class=\"kpi-card\">\n                <div class=\"kpi-label\">Real Acumulado</div>\n                <div class=\"kpi-value\">{{msg.payload.real_turno_acum}}</div>\n            </div>\n        </div>\n        \n        <div class=\"progress-section\">\n            <div class=\"progress-label\">\n                <span>Progreso del Turno</span>\n                <span>{{Math.round((msg.payload.hora/8)*100)}}%</span>\n            </div>\n            <div class=\"progress-bar\">\n                <div class=\"progress-fill\" :style=\"{ width: (msg.payload.hora/8)*100 + '%' }\"></div>\n            </div>\n        </div>\n    </div>\n    <div v-else>\n        <div style=\"text-align: center; color: #64748b; padding: 40px;\">\n            <div style=\"font-size: 3em; margin-bottom: 16px;\">⏳</div>\n            Esperando datos de simulación...\n        </div>\n    </div>\n</div>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 830,
-        "y": 460,
+        "x": 770,
+        "y": 160,
         "wires": [
             []
         ]
     },
     {
-        "id": "6ad831d3dd815a8d",
+        "id": "abb70d9df99f8eb3",
         "type": "switch",
         "z": "ba2c364934eb086e",
         "name": "¿Hubo Desviación? (<90%)",
@@ -923,17 +932,17 @@
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 800,
-        "y": 520,
+        "x": 740,
+        "y": 220,
         "wires": [
             [
-                "485c99aba738de78"
+                "050f7ac0b7945f8f"
             ]
         ]
     },
     {
-        "id": "e8169858b4e9f349",
-        "type": "ui-slider",
+        "id": "nuevo_staffing_input",
+        "type": "ui-number-input",
         "z": "ba2c364934eb086e",
         "group": "dff97118a2e91311",
         "name": "Parámetro: Staffing",
@@ -941,30 +950,31 @@
         "order": 1,
         "width": 0,
         "height": 0,
-        "passthru": false,
-        "topic": "msg.payload",
-        "topicType": "str",
-        "showTicks": "false",
-        "min": "1",
-        "max": "5",
-        "step": "1",
-        "className": "slider-modern",
-        "iconPrepend": "",
-        "iconAppend": "",
-        "color": "",
-        "colorTrack": "",
-        "colorThumb": "",
-        "showTextField": false,
-        "x": 220,
-        "y": 600,
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 1,
+        "max": 10,
+        "step": 1,
+        "tooltip": "Número de trabajadores asignados",
+        "passthru": true,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "input-modern",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 160,
+        "y": 300,
         "wires": [
             [
-                "7b621d826eac247d"
+                "f10bf63efeb232db"
             ]
         ]
     },
     {
-        "id": "1650d35ca50437b4",
+        "id": "7f95ed9d58a793f9",
         "type": "ui-number-input",
         "z": "ba2c364934eb086e",
         "group": "dff97118a2e91311",
@@ -988,16 +998,16 @@
         "iconPosition": "left",
         "iconInnerPosition": "inside",
         "spinner": "default",
-        "x": 220,
-        "y": 660,
+        "x": 160,
+        "y": 360,
         "wires": [
             [
-                "14f5248e9d96fc36"
+                "ec882bd8c3e02b5e"
             ]
         ]
     },
     {
-        "id": "6ccd8ea09ec38a00",
+        "id": "064ec667edcefcd1",
         "type": "function",
         "z": "ba2c364934eb086e",
         "name": "Formatear Gráfico (por Turno)",
@@ -1008,16 +1018,16 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 820,
-        "y": 620,
+        "x": 760,
+        "y": 320,
         "wires": [
             [
-                "a74dea6555fb9a99"
+                "7cab60128b93b30d"
             ]
         ]
     },
     {
-        "id": "7b621d826eac247d",
+        "id": "f10bf63efeb232db",
         "type": "change",
         "z": "ba2c364934eb086e",
         "name": "set flow.staffing",
@@ -1035,14 +1045,14 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 440,
-        "y": 600,
+        "x": 380,
+        "y": 300,
         "wires": [
             []
         ]
     },
     {
-        "id": "14f5248e9d96fc36",
+        "id": "ec882bd8c3e02b5e",
         "type": "change",
         "z": "ba2c364934eb086e",
         "name": "set flow.meta_hora",
@@ -1060,10 +1070,76 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 490,
-        "y": 660,
+        "x": 430,
+        "y": 360,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "agregar_celda_btn",
+        "type": "ui-button",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Agregar Celda",
+        "label": "➕ Agregar Celda",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "tooltip": "Agregar una nueva celda de trabajo",
+        "color": "btn-success",
+        "className": "btn-modern",
+        "icon": "fa-plus",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "agregar_celda",
+        "topicType": "msg",
+        "x": 220,
+        "y": 80,
+        "wires": [
+            [
+                "manejar_agregar_celda"
+            ]
+        ]
+    },
+    {
+        "id": "manejar_agregar_celda",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Manejar Agregar Celda",
+        "func": "// Obtener el array actual de celdas\nlet celdas = flow.get(\"celdas\") || [];\n\n// Crear una nueva celda\nlet nuevoId = celdas.length > 0 ? Math.max(...celdas.map(c => c.id)) + 1 : 1;\nlet nuevaCelda = {\n    id: nuevoId,\n    estado: \"parada\",\n    unid_ok_hora: 0,\n    unid_ok_total_turno: 0,\n    tiempo_ciclo: 10 + Math.floor(Math.random() * 10), // Tiempo ciclo aleatorio entre 10-19\n    utilizacion: 0,\n    tiempo_espera: 0,\n    horas_trabajadas: 0\n};\n\n// Agregar la nueva celda\nceldas.push(nuevaCelda);\n\n// Guardar en el flow\nflow.set(\"celdas\", celdas);\n\n// Enviar mensaje para actualizar el grid\nlet msg_grid = { payload: celdas };\nreturn [msg_grid];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 40,
+        "wires": [
+            [
+                "738e81e8dcb99197"
+            ]
+        ]
+    },
+    {
+        "id": "manejar_eliminar_celda",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Manejar Eliminar Celda",
+        "func": "let celdas = flow.get(\"celdas\") || [];\nlet id = msg.payload.id;\n\n// Eliminar la celda con el id\nceldas = celdas.filter(c => c.id !== id);\n\n// Guardar el nuevo array\nflow.set(\"celdas\", celdas);\n\n// Enviar el nuevo array al grid\nlet msg_grid = { payload: celdas };\nreturn [msg_grid];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 80,
+        "wires": [
+            [
+                "738e81e8dcb99197"
+            ]
         ]
     }
 ]
