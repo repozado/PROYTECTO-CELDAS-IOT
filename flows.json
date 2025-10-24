@@ -93,7 +93,7 @@
                 "cols": "12"
             }
         ],
-        "order": 2,
+        "order": 1,
         "className": "",
         "visible": true,
         "disabled": true
@@ -155,23 +155,96 @@
         "groupType": "default"
     },
     {
-        "id": "7a4dd23066bfae3c",
-        "type": "ui-theme",
-        "name": "Default Theme",
-        "colors": {
-            "surface": "#054c51",
-            "primary": "#8ecde6",
-            "bgPage": "#b4c5c2",
-            "groupBg": "#cde4f9",
-            "groupOutline": "#000000"
-        },
-        "sizes": {
-            "density": "default",
-            "pagePadding": "12px",
-            "groupGap": "12px",
-            "groupBorderRadius": "4px",
-            "widgetGap": "12px"
-        }
+        "id": "3626d05e026cd851",
+        "type": "ui-page",
+        "name": "Celdas de trabajo 2",
+        "ui": "9477a706cabb673d",
+        "path": "/page3",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "7a4dd23066bfae3c",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "dff97118a2e91311",
+        "type": "ui-group",
+        "name": "Controles de simulación",
+        "page": "3626d05e026cd851",
+        "width": 6,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "81867aea22c8ac4c",
+        "type": "ui-group",
+        "name": "KPIs por turno",
+        "page": "3626d05e026cd851",
+        "width": 6,
+        "height": 1,
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "2ae92a9af38a7961",
+        "type": "ui-group",
+        "name": "Estado de celda",
+        "page": "3626d05e026cd851",
+        "width": 6,
+        "height": 1,
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "db6adb7ea7e9c1ec",
+        "type": "ui-group",
+        "name": "Productividad por turno",
+        "page": "3626d05e026cd851",
+        "width": 6,
+        "height": 1,
+        "order": 4,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
     },
     {
         "id": "73f9c4c8ee0ef9bb",
@@ -681,7 +754,7 @@
         "id": "c1c7780aae039ad1",
         "type": "ui-template",
         "z": "ba2c364934eb086e",
-        "group": "74debade9c3360f9",
+        "group": "2ae92a9af38a7961",
         "page": "",
         "ui": "",
         "name": "Grid de Celdas (Proceso Textil)",
@@ -704,7 +777,7 @@
         "id": "98b0c790b63cfeb6",
         "type": "ui-template",
         "z": "ba2c364934eb086e",
-        "group": "09d181d345ee74e0",
+        "group": "81867aea22c8ac4c",
         "page": "",
         "ui": "",
         "name": "Tabla comparativa metas vs real",
@@ -727,7 +800,7 @@
         "id": "84e3fdf1fb3598f9",
         "type": "ui-chart",
         "z": "ba2c364934eb086e",
-        "group": "a113bad1763a3c9b",
+        "group": "db6adb7ea7e9c1ec",
         "name": "Gráfico",
         "label": "Producción vs Meta por Turno",
         "order": 1,
@@ -845,7 +918,7 @@
         "type": "ui-notification",
         "z": "ba2c364934eb086e",
         "ui": "9477a706cabb673d",
-        "position": "top left",
+        "position": "top right",
         "colorDefault": false,
         "color": "#f44336",
         "displayTime": "5",
@@ -857,7 +930,7 @@
         "confirmText": "Confirm",
         "raw": false,
         "className": "",
-        "name": "Alerta de Desviación",
+        "name": "Alerta de Desviación 2",
         "x": 1260,
         "y": 180,
         "wires": []
@@ -866,7 +939,7 @@
         "id": "696c5cc2febe827b",
         "type": "ui-slider",
         "z": "ba2c364934eb086e",
-        "group": "3b0ef8a4584dcf09",
+        "group": "dff97118a2e91311",
         "name": "Parámetro: Staffing",
         "label": "Personal (Staffing):",
         "order": 1,
@@ -898,7 +971,7 @@
         "id": "4dbba5aa2bc0e7d0",
         "type": "ui-number-input",
         "z": "ba2c364934eb086e",
-        "group": "3b0ef8a4584dcf09",
+        "group": "dff97118a2e91311",
         "name": "Parámetro: Meta por Hora",
         "label": "Meta por Hora (por celda):",
         "order": 2,
