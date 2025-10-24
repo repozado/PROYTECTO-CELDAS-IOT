@@ -646,9 +646,7 @@
         "x": 490,
         "y": 140,
         "wires": [
-            [
-                "58f9ce1db074ea84"
-            ],
+            [],
             [
                 "091252891773a22f"
             ],
@@ -656,29 +654,6 @@
                 "19b5db394a7e9860",
                 "19d141e1644cd53d"
             ]
-        ]
-    },
-    {
-        "id": "58f9ce1db074ea84",
-        "type": "ui-template",
-        "z": "4c0973556f015184",
-        "group": "6e18838a8ce84c0b",
-        "page": "",
-        "ui": "",
-        "name": "Grid de Celdas (Proceso Textil)",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Un poco más ancho */\n        gap: 10px;\n        padding: 10px;\n    }\n    .celda {\n        border: 1px solid #444;\n        border-radius: 5px;\n        padding: 10px;\n        text-align: center;\n        color: #333;\n        transition: background-color 0.3s ease;\n        height: 180px; /* Un poco más alto para los KPIs */\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n    }\n    .celda-title {\n        font-weight: bold;\n        font-size: 1.1em;\n        border-bottom: 1px solid rgba(0,0,0,0.2);\n        margin-bottom: 5px;\n        padding-bottom: 5px;\n    }\n    /* Contenedor KPIs inferiores */\n    .celda-kpis-bottom {\n        font-size: 0.8em; /* Más pequeño */\n        text-align: left;\n        margin-top: 8px;\n        line-height: 1.3;\n        color: rgba(0,0,0,0.7); /* Color texto KPIs */\n    }\n    .celda-kpis-bottom b {\n         color: rgba(0,0,0,0.9); /* Color etiquetas KPIs */\n    }\n\n    /* Icono grande para el proceso o estado */\n    .proceso-icon {\n        font-size: 2.5em; /* Icono grande */\n        line-height: 1.2;\n        flex-grow: 1; /* Ocupa espacio disponible */\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        min-height: 40px; /* Altura mínima para el icono */\n    }\n\n    /* Barra de progreso del PROCESO */\n    .proceso-progreso-container {\n        background-color: rgba(0,0,0,0.3);\n        border-radius: 4px;\n        height: 10px;\n        width: 100%;\n        margin-top: 5px;\n        border: 1px solid rgba(0,0,0,0.2);\n        overflow: hidden;\n    }\n    .proceso-progreso-value {\n        background-color: #FFF;\n        opacity: 0.8;\n        height: 100%;\n        transition: width 0.3s ease;\n    }\n    .progreso-text {\n        font-size: 0.8em;\n        font-weight: bold;\n        color: rgba(255,255,255,0.9);\n        margin-top: 2px;\n    }\n    .estado-text { /* Para mostrar texto de estado (PARADA, ESPERANDO...) */\n         font-weight: bold;\n         margin-top: 10px;\n         font-size: 0.9em;\n    }\n\n\n    /* Clases de estado (Fondo) */\n    .celda-estado-trabajando { background-color: #2a9d8f; color: white; }\n    .celda-estado-parada { background-color: #e76f51; color: white; }\n    .celda-estado-esperando { background-color: #e9c46a; color: black; }\n    .celda-estado-sin_personal { background-color: #607D8B; color: white; }\n\n    /* Ajuste color KPIs en fondos oscuros */\n    .celda-estado-trabajando .celda-kpis-bottom,\n    .celda-estado-parada .celda-kpis-bottom,\n    .celda-estado-sin_personal .celda-kpis-bottom {\n        color: rgba(255,255,255,0.7);\n    }\n     .celda-estado-trabajando .celda-kpis-bottom b,\n    .celda-estado-parada .celda-kpis-bottom b,\n    .celda-estado-sin_personal .celda-kpis-bottom b {\n        color: rgba(255,255,255,0.9);\n    }\n\n</style>\n\n<div class=\"grid-container\">\n\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n\n        <div style=\"flex-grow: 1; display: flex; flex-direction: column; justify-content: center;\">\n            <div v-if=\"celda.estado === 'trabajando'\">\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.proceso === 'corte'\">✂️</span>\n                    <span v-else-if=\"celda.proceso === 'costura'\">🧵</span>\n                    <span v-else-if=\"celda.proceso === 'inspeccion'\">🔍</span>\n                    <span v-else-if=\"celda.proceso === 'empaque'\">📦</span>\n                </div>\n                <div class=\"progreso-text\">{{celda.proceso.toUpperCase()}}</div>\n                <div class=\"proceso-progreso-container\">\n                    <div class=\"proceso-progreso-value\" :style=\"{ width: celda.progreso + '%' }\"></div>\n                </div>\n            </div>\n            <div v-else>\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.estado === 'parada'\">⚠️</span>\n                    <span v-else-if=\"celda.estado === 'esperando'\">⏳</span>\n                    <span v-else-if=\"celda.estado === 'sin_personal'\">🚫</span>\n                </div>\n                 <div class=\"estado-text\">{{celda.estado.toUpperCase()}}</div>\n            </div>\n        </div>\n\n        <div class=\"celda-kpis-bottom\">\n            <div><b>Prod. Turno:</b> {{celda.unid_ok_total_turno}}</div>\n            <div><b>Util (%):</b> {{celda.utilizacion.toFixed(1)}}%</div>\n            <div><b>Espera (h):</b> {{celda.tiempo_espera}}</div>\n        </div>\n\n    </div>\n</div>",
-        "storeOutMessages": true,
-        "passthru": true,
-        "resendOnRefresh": true,
-        "templateScope": "local",
-        "className": "",
-        "x": 850,
-        "y": 80,
-        "wires": [
-            []
         ]
     },
     {
