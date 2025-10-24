@@ -1157,27 +1157,466 @@
         ]
     },
     {
+<<<<<<< Updated upstream
         "id": "b2c3d4e5f6a7b8a9",
+=======
+        "id": "f72d318cb72a7ef1",
+        "type": "inject",
+        "z": "ba2c364934eb086e",
+        "name": "Simular 1 Hora (cada 5 seg)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "tick",
+        "payloadType": "str",
+        "x": 280,
+        "y": 200,
+        "wires": [
+            [
+                "427ddaa7a8fc99b2"
+            ]
+        ]
+    },
+    {
+        "id": "07da04a24715fe05",
+        "type": "ui-number-input",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Parámetro: Staffing",
+        "label": "👥 Personal (Staffing):",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 1,
+        "max": 10,
+        "step": 1,
+        "tooltip": "Número de trabajadores asignados",
+        "passthru": true,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "input-modern",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 280,
+        "y": 340,
+        "wires": [
+            [
+                "b4e5f30ea2da98ce"
+            ]
+        ]
+    },
+    {
+        "id": "2d2174b8b47831ba",
+        "type": "ui-number-input",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Parámetro: Meta por Hora",
+        "label": "🎯 Meta por Hora (por celda):",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 1,
+        "max": 20,
+        "step": 1,
+        "tooltip": "Establece la meta de producción por hora para cada celda",
+        "passthru": true,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "input-modern",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 280,
+        "y": 400,
+        "wires": [
+            [
+                "86c39f03d41de4f5"
+            ]
+        ]
+    },
+    {
+        "id": "88d233e25f092b44",
+        "type": "ui-button",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Agregar Celda",
+        "label": "➕ Agregar Celda",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "tooltip": "Agregar una nueva celda de trabajo",
+        "color": "btn-success",
+        "className": "btn-modern",
+        "icon": "fa-plus",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "agregar_celda",
+        "topicType": "msg",
+        "x": 350,
+        "y": 40,
+        "wires": [
+            [
+                "5b8abaa838e6b635"
+            ]
+        ]
+    },
+    {
+        "id": "d4226be2cd6504a0",
+        "type": "ui-notification",
+        "z": "ba2c364934eb086e",
+        "ui": "9477a706cabb673d",
+        "position": "top right",
+        "colorDefault": false,
+        "color": "#ef4444",
+        "displayTime": "8",
+        "showCountdown": true,
+        "outputs": 0,
+        "allowDismiss": true,
+        "dismissText": "Cerrar",
+        "allowConfirm": false,
+        "confirmText": "Confirm",
+        "raw": true,
+        "className": "modern-notification",
+        "name": "Alerta de Desviación",
+        "x": 1380,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "3a79115d5dfc9328",
+>>>>>>> Stashed changes
         "type": "ui-template",
         "z": "e74f59003df1920c",
         "group": "082d639628900acd",
         "page": "",
         "ui": "",
+<<<<<<< Updated upstream
         "name": "Selector de Personal (Staffing)",
         "order": 2,
         "width": "6",
         "height": "4",
         "format": "<style>\n    .staffing-selector-container {\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        padding: 20px 0;\n        width: 100%;\n        gap: 12px;\n        flex-wrap: wrap;\n    }\n\n    .staffing-person-icon {\n        font-size: 2.5em;\n        cursor: pointer;\n        transition: all 0.3s ease-in-out;\n        padding: 15px;\n        border-radius: 12px;\n        background: linear-gradient(145deg, #f0f0f0, #cacaca);\n        box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;\n        position: relative;\n        user-select: none;\n    }\n\n    /* Estado NO seleccionado */\n    .staffing-person-icon:not(.active) {\n        filter: grayscale(100%);\n        opacity: 0.4;\n    }\n\n    .staffing-person-icon:not(.active):hover {\n        transform: scale(1.1);\n        opacity: 0.6;\n        box-shadow: 2px 2px 4px #bebebe, -2px -2px 4px #ffffff;\n    }\n\n    /* Estado SELECCIONADO (activo) */\n    .staffing-person-icon.active {\n        background: linear-gradient(145deg, #00bfa5, #009688);\n        box-shadow: \n            0 4px 15px rgba(0, 150, 136, 0.4),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        filter: grayscale(0%);\n        transform: scale(1.05);\n        animation: pulse 2s ease-in-out infinite;\n    }\n\n    .staffing-person-icon.active:hover {\n        transform: scale(1.15);\n        box-shadow: \n            0 6px 20px rgba(0, 150, 136, 0.6),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n    }\n\n    /* Badge con el número */\n    .person-badge {\n        position: absolute;\n        bottom: -5px;\n        right: -5px;\n        background: #FF5722;\n        color: white;\n        font-size: 0.4em;\n        font-weight: bold;\n        border-radius: 50%;\n        width: 1.4em;\n        height: 1.4em;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        border: 2px solid white;\n        box-shadow: 0 2px 4px rgba(0,0,0,0.3);\n    }\n\n    .staffing-person-icon.active .person-badge {\n        background: #4CAF50;\n    }\n\n    /* Animación de pulso para activos */\n    @keyframes pulse {\n        0%, 100% {\n            box-shadow: \n                0 4px 15px rgba(0, 150, 136, 0.4),\n                inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        }\n        50% {\n            box-shadow: \n                0 4px 25px rgba(0, 150, 136, 0.7),\n                inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        }\n    }\n\n    .staffing-label {\n        font-size: 1.1em;\n        font-weight: bold;\n        margin-bottom: 15px;\n        color: #333;\n        text-align: center;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        gap: 10px;\n    }\n\n    .staffing-count {\n        background: linear-gradient(145deg, #009688, #00bfa5);\n        color: white;\n        padding: 8px 20px;\n        border-radius: 20px;\n        font-size: 1.2em;\n        box-shadow: 0 3px 8px rgba(0, 150, 136, 0.4);\n        min-width: 60px;\n        text-align: center;\n    }\n</style>\n\n<div>\n    <div class=\"staffing-label\">\n        👥 Personal Asignado: \n        <span class=\"staffing-count\">{{currentStaffing}}/{{maxStaffing}}</span>\n    </div>\n\n    <div class=\"staffing-selector-container\">\n        <span v-for=\"i in maxStaffing\"\n              :key=\"i\"\n              class=\"staffing-person-icon\"\n              :class=\"{ 'active': i <= currentStaffing }\"\n              @click=\"sendStaffing(i)\">\n            👤\n            <span class=\"person-badge\">{{i}}</span>\n        </span>\n    </div>\n</div>\n\n<script>\n    export default {\n        data() {\n            return {\n                currentStaffing: 3,\n                maxStaffing: 6\n            }\n        },\n        \n        watch: {\n            msg: {\n                handler(newMsg) {\n                    if (newMsg && newMsg.payload !== undefined) {\n                        let val = parseInt(newMsg.payload, 10);\n                        if (!isNaN(val) && val >= 1 && val <= this.maxStaffing) {\n                            this.currentStaffing = val;\n                        }\n                    }\n                    \n                    if (newMsg && newMsg.numCeldas !== undefined) {\n                        let numCeldas = parseInt(newMsg.numCeldas, 10);\n                        if (!isNaN(numCeldas) && numCeldas > 0) {\n                            this.maxStaffing = numCeldas;\n                            if (this.currentStaffing > numCeldas) {\n                                this.currentStaffing = numCeldas;\n                                this.send({ payload: numCeldas });\n                            }\n                        }\n                    }\n                },\n                deep: true\n            }\n        },\n        \n        mounted() {\n            // Enviar valor inicial\n            this.send({ payload: this.currentStaffing });\n        },\n        \n        methods: {\n            sendStaffing(count) {\n                // CRÍTICO: Actualizar el data local primero\n                this.currentStaffing = count;\n                \n                // Luego enviar a Node-RED\n                this.send({ payload: count });\n            }\n        }\n    }\n</script>",
+=======
+        "name": "Grid de Celdas (Proceso Textil)",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));\n        gap: 20px;\n        padding: 20px;\n        background: #f8fafc;\n        border-radius: 16px;\n        min-height: 400px;\n    }\n    \n    .celda {\n        border: 2px solid #e2e8f0;\n        border-radius: 16px;\n        padding: 20px;\n        text-align: center;\n        color: #2d3748;\n        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);\n        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        position: relative;\n        overflow: hidden;\n        cursor: pointer;\n    }\n    \n    .celda:hover {\n        transform: translateY(-8px);\n        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);\n    }\n    \n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 6px;\n        transition: all 0.4s ease;\n    }\n    \n    .celda-title {\n        font-weight: 800;\n        font-size: 1.2em;\n        margin-bottom: 16px;\n        padding-bottom: 12px;\n        border-bottom: 2px solid #f1f5f9;\n        color: #1e293b;\n        letter-spacing: -0.5px;\n    }\n    \n    .celda-kpi {\n        font-size: 0.9em;\n        text-align: left;\n        margin-top: 8px;\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n        padding: 4px 0;\n    }\n    \n    .celda-kpi b {\n        color: #64748b;\n        font-weight: 600;\n    }\n    \n    /* Estados con animaciones */\n    .celda-estado-trabajando::before { \n        background: linear-gradient(135deg, #10b981, #059669);\n        animation: pulse-green 2s infinite;\n    }\n    .celda-estado-trabajando { \n        border-top: 6px solid #10b981;\n        animation: glow-green 3s ease-in-out infinite alternate;\n    }\n    \n    .celda-estado-parada::before { \n        background: linear-gradient(135deg, #ef4444, #dc2626);\n        animation: pulse-red 2s infinite;\n    }\n    .celda-estado-parada { \n        border-top: 6px solid #ef4444;\n    }\n    \n    .celda-estado-esperando::before { \n        background: linear-gradient(135deg, #f59e0b, #d97706);\n        animation: pulse-orange 2s infinite;\n    }\n    .celda-estado-esperando { \n        border-top: 6px solid #f59e0b;\n    }\n    \n    .celda-estado-sin_personal::before { \n        background: linear-gradient(135deg, #6b7280, #4b5563);\n    }\n    .celda-estado-sin_personal { \n        border-top: 6px solid #6b7280;\n    }\n\n    /* Barra de utilización mejorada */\n    .util-bar-container {\n        background-color: #e2e8f0;\n        border-radius: 12px;\n        height: 20px;\n        width: 100%;\n        margin-top: 12px;\n        border: 1px solid #cbd5e1;\n        overflow: hidden;\n        position: relative;\n    }\n    \n    .util-bar-value {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 2s infinite;\n    }\n    \n    /* Imágenes de estado mejoradas */\n    .estado-imagen {\n        width: 64px;\n        height: 64px;\n        margin: 0 auto 15px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        filter: brightness(0.9);\n        transition: transform 0.3s ease;\n    }\n    \n    .celda:hover .estado-imagen {\n        transform: scale(1.1);\n    }\n    \n    .imagen-trabajando { background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064039.png'); }\n    .imagen-parada { background-image: url('https://cdn-icons-png.flaticon.com/512/458/458594.png'); }\n    .imagen-esperando { background-image: url('https://cdn-icons-png.flaticon.com/512/3305/3305803.png'); }\n    .imagen-sin_personal { background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828843.png'); }\n    \n    .estado-texto {\n        font-size: 0.8em;\n        font-weight: 800;\n        margin-bottom: 12px;\n        padding: 6px 12px;\n        border-radius: 8px;\n        text-transform: uppercase;\n        letter-spacing: 1px;\n        transition: all 0.3s ease;\n    }\n    \n    .estado-trabajando { background: #d1fae5; color: #065f46; }\n    .estado-parada { background: #fee2e2; color: #991b1b; }\n    .estado-esperando { background: #fef3c7; color: #92400e; }\n    .estado-sin_personal { background: #f1f5f9; color: #374151; }\n    \n    .valor-destacado {\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        font-size: 1.1em;\n    }\n    \n    /* Animaciones */\n    @keyframes pulse-green {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.7; }\n    }\n    \n    @keyframes pulse-red {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.6; }\n    }\n    \n    @keyframes pulse-orange {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.7; }\n    }\n    \n    @keyframes glow-green {\n        0% { box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06); }\n        100% { box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2); }\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n    \n    /* Controles de celdas */\n    .celda-controls {\n        margin-top: 15px;\n        padding-top: 15px;\n        border-top: 1px solid #f1f5f9;\n    }\n    \n    .btn-eliminar {\n        background: linear-gradient(135deg, #ef4444, #dc2626);\n        color: white;\n        border: none;\n        padding: 6px 12px;\n        border-radius: 8px;\n        font-size: 0.8em;\n        font-weight: 600;\n        cursor: pointer;\n        transition: all 0.3s ease;\n    }\n    \n    .btn-eliminar:hover {\n        transform: scale(1.05);\n        box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);\n    }\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n        \n        <!-- Imagen representativa del estado -->\n        <div class=\"estado-imagen\" :class=\"'imagen-' + celda.estado\"></div>\n        <div class=\"estado-texto\" :class=\"'estado-' + celda.estado\">{{celda.estado.toUpperCase()}}</div>\n        \n        <div class=\"celda-kpi\">\n            <b>Prod/h:</b>\n            <span class=\"valor-destacado\">{{celda.unid_ok_hora}}</span>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Util:</b>\n            <span class=\"valor-destacado\">{{celda.utilizacion.toFixed(1)}}%</span>\n        </div>\n        <div class=\"util-bar-container\">\n            <div class=\"util-bar-value\" :style=\"{ width: Math.min(celda.utilizacion, 100).toFixed(1) + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Espera:</b>\n            <span class=\"valor-destacado\">{{celda.tiempo_espera}}h</span>\n        </div>\n        \n        <div class=\"celda-controls\">\n            <button class=\"btn-eliminar\" @click=\"eliminarCelda(celda.id)\">Eliminar</button>\n        </div>\n    </div>\n</div>\n\n<script>\nexport default {\n    methods: {\n        eliminarCelda(id) {\n            this.send({payload: {action: 'eliminar', id: id}});\n        }\n    }\n}\n</script>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
+        "x": 910,
+        "y": 120,
+        "wires": [
+            [
+                "ebfa756e87297731"
+            ]
+        ]
+    },
+    {
+        "id": "e711f807d9565d21",
+        "type": "ui-chart",
+        "z": "ba2c364934eb086e",
+        "group": "db6adb7ea7e9c1ec",
+        "name": "Gráfico Producción",
+        "label": "Producción vs Meta por Turno",
+        "order": 1,
+        "chartType": "bar",
+        "category": "",
+        "categoryType": "none",
+        "xAxisLabel": "Turnos",
+        "xAxisProperty": "payload.x",
+        "xAxisPropertyType": "msg",
+        "xAxisType": "category",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "Unidades Producidas",
+        "yAxisProperty": "payload.y",
+        "yAxisPropertyType": "msg",
+        "ymin": "0",
+        "ymax": "",
+        "bins": "",
+        "stackSeries": false,
+        "pointRadius": 6,
+        "showLegend": true,
+        "removeOlder": "10",
+        "removeOlderUnit": "points",
+        "removeOlderPoints": "",
+        "colors": [
+            "#3b82f6",
+            "#10b981",
+            "#f59e0b",
+            "#ef4444",
+            "#8b5cf6"
+        ],
+        "textColor": [
+            "#475569"
+        ],
+        "textColorDefault": false,
+        "gridColor": [
+            "#f8fafc"
+        ],
+        "gridColorDefault": false,
+        "width": "6",
+        "height": "4",
+        "className": "chart-modern",
+        "interpolation": "monotone",
+        "x": 1130,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ef05b9b396e07759",
+        "type": "change",
+        "z": "ba2c364934eb086e",
+        "name": "Preparar Msg de Alerta",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.alerta_msg",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Alerta de Producción",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "className",
+                "pt": "msg",
+                "to": "payload.hubo_desviacion ? 'alerta-error' : 'alerta-success'",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1130,
+        "y": 260,
+        "wires": [
+            [
+                "d4226be2cd6504a0"
+            ]
+        ]
+    },
+    {
+        "id": "427ddaa7a8fc99b2",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Motor de Simulación (Gemelo Digital)",
+        "func": "// --- 1. OBTENER ESTADO ANTERIOR (O INICIALIZAR) ---\nlet celdas = flow.get(\"celdas\") || [\n    { id: 1, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 2, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 12, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 3, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 8, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 4, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 5, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 15, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 }\n];\nlet estado_sim = flow.get(\"estado_sim\") || { hora_turno: 0, num_turno: 1, horas_totales: 0 };\n\n// --- 2. OBTENER PARÁMETROS DEL DASHBOARD ---\nlet staffing = flow.get(\"staffing\") || 3;\nlet meta_hora_por_celda = flow.get(\"meta_hora\") || 5;\n\n// --- 3. AVANZAR SIMULACIÓN 1 HORA ---\nestado_sim.hora_turno++;\nestado_sim.horas_totales++;\n\nlet produccion_total_hora = 0;\nlet produccion_total_turno_acumulada = 0;\n\n// --- 4. SIMULACIÓN POR CELDA (Flujo, KPIs) ---\nfor (let i = 0; i < celdas.length; i++) {\n    let celda = celdas[i];\n\n    // 4.1. Reasignación de Personal (Ampliación \"Qué-pasa-si\")\n    if (i < staffing) {\n        // Celda TIENE personal.\n\n        // 4.2. Simulación Cuello de Botella (Objetivo)\n        // Celda 2 depende de Celda 1.\n        if (celda.id === 2 && celdas[0].estado !== 'trabajando') {\n            celda.estado = 'esperando';\n            celda.tiempo_espera += 1; // KPI: Tiempos de espera\n            celda.unid_ok_hora = 0;\n        }\n        // 4.3. Simulación de Falla Aleatoria (para celdas que no están esperando)\n        else if (celda.estado !== 'esperando') {\n            let rand = Math.random();\n            if (rand < 0.85) { // 85% chance de trabajar\n                celda.estado = 'trabajando';\n                // Calcular producción de la hora\n                celda.unid_ok_hora = Math.floor(60 / celda.tiempo_ciclo);\n                celda.unid_ok_total_turno += celda.unid_ok_hora;\n                celda.horas_trabajadas += 1;\n            } else { // 15% chance de falla\n                celda.estado = 'parada';\n                celda.unid_ok_hora = 0;\n            }\n        }\n    } else {\n        // Celda NO tiene personal\n        celda.estado = 'sin_personal';\n        celda.unid_ok_hora = 0;\n    }\n\n    // 4.4. Calcular KPIs de Celda (Variables)\n    // Prevenir división por cero en el primer tick del reseteo\n    if (estado_sim.hora_turno > 0) {\n        celda.utilizacion = (celda.horas_trabajadas / estado_sim.hora_turno) * 100; // KPI: Utilización\n    } else {\n        celda.utilizacion = 0;\n    }\n    produccion_total_turno_acumulada += celda.unid_ok_total_turno;\n    produccion_total_hora += celda.unid_ok_hora;\n}\n\n// --- 5. PREPARAR SALIDAS (Dashboard) ---\n\n// Salida 1: Datos para el Grid de Celdas (se envía siempre)\nlet msg_grid = { payload: celdas };\n\n// Salida 2: Datos para la Tabla Comparativa (se envía siempre)\nlet meta_hora_total_staffed = meta_hora_por_celda * staffing;\nlet msg_tabla = {\n    payload: {\n        hora: estado_sim.hora_turno,\n        turno: estado_sim.num_turno,\n        staffing: staffing,\n        meta_hora: meta_hora_total_staffed,\n        real_hora: produccion_total_hora,\n        meta_turno_acum: meta_hora_total_staffed * estado_sim.hora_turno,\n        real_turno_acum: produccion_total_turno_acumulada\n    }\n};\n\nlet msg_turno_fin = null;\n\n// --- 6. AGREGACIÓN POR TURNO (Flujo) ---\nif (estado_sim.hora_turno >= 8) { // Asumimos turno de 8 horas\n    let meta_total_turno = meta_hora_total_staffed * 8;\n    let real_total_turno = produccion_total_turno_acumulada;\n    let cumplimiento = 0;\n    if (meta_total_turno > 0) {\n        cumplimiento = (real_total_turno / meta_total_turno) * 100;\n    }\n\n    // 6.1. Preparar Salida 3: Datos de fin de turno (Gráfico y Alerta)\n    msg_turno_fin = {\n        payload: {\n            turno: estado_sim.num_turno,\n            meta: meta_total_turno,\n            real: real_total_turno,\n            cumplimiento: cumplimiento,\n            // Mensaje para la alerta\n            alerta_msg: cumplimiento < 90 ?\n                `⚠️ ALERTA: Desviación en Turno ${estado_sim.num_turno}. Cumplimiento: ${cumplimiento.toFixed(1)}%` :\n                `✅ Turno ${estado_sim.num_turno} OK. Cumplimiento: ${cumplimiento.toFixed(1)}%`,\n            // Flag para el switch de alerta\n            hubo_desviacion: cumplimiento < 90\n        }\n    };\n\n    // 6.3. Resetear para el siguiente turno\n    estado_sim.hora_turno = 0;\n    estado_sim.num_turno++;\n    for (let celda of celdas) {\n        celda.unid_ok_total_turno = 0;\n        celda.horas_trabajadas = 0;\n        celda.tiempo_espera = 0;\n        celda.utilizacion = 0;\n    }\n}\n\n// --- 7. GUARDAR ESTADO PARA PRÓXIMO TICK ---\nflow.set(\"celdas\", celdas);\nflow.set(\"estado_sim\", estado_sim);\n\n// Retornar mensajes a las 3 salidas del nodo\nreturn [msg_grid, msg_tabla, msg_turno_fin];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Código de inicialización (opcional)\nflow.set(\"celdas\", undefined);\nflow.set(\"estado_sim\", undefined);\nflow.set(\"staffing\", 3);\nflow.set(\"meta_hora\", 5);",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 200,
+        "wires": [
+            [
+                "3a79115d5dfc9328"
+            ],
+            [
+                "8477965d7ea1cd26"
+            ],
+            [
+                "6ad831d3dd815a8d",
+                "7769296a9efdc9f6"
+            ]
+        ]
+    },
+    {
+        "id": "8477965d7ea1cd26",
+        "type": "ui-template",
+        "z": "ba2c364934eb086e",
+        "group": "81867aea22c8ac4c",
+        "page": "",
+        "ui": "",
+        "name": "KPIs en Tiempo Real",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "format": "<style>\n    .dashboard-container {\n        background: white;\n        border-radius: 16px;\n        padding: 24px;\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        font-family: 'Segoe UI', system-ui, sans-serif;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .kpi-header {\n        font-size: 1.3em;\n        font-weight: 800;\n        color: #1e293b;\n        margin-bottom: 24px;\n        padding-bottom: 16px;\n        border-bottom: 3px solid #f1f5f9;\n        display: flex;\n        align-items: center;\n        gap: 12px;\n        letter-spacing: -0.5px;\n    }\n    \n    .kpi-grid {\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n        gap: 20px;\n        margin-bottom: 24px;\n    }\n    \n    .kpi-card {\n        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);\n        padding: 20px;\n        border-radius: 12px;\n        border-left: 5px solid #3b82f6;\n        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        border: 1px solid #f1f5f9;\n    }\n    \n    .kpi-card:hover {\n        transform: translateY(-4px);\n        box-shadow: 0 8px 16px rgba(0,0,0,0.12);\n    }\n    \n    .kpi-card.meta { border-left-color: #10b981; }\n    .kpi-card.real { border-left-color: #f59e0b; }\n    .kpi-card.acum { border-left-color: #8b5cf6; }\n    \n    .kpi-label {\n        font-size: 0.9em;\n        color: #64748b;\n        font-weight: 700;\n        text-transform: uppercase;\n        letter-spacing: 0.8px;\n        margin-bottom: 8px;\n    }\n    \n    .kpi-value {\n        font-size: 1.8em;\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        letter-spacing: -1px;\n    }\n    \n    .progress-section {\n        margin-top: 24px;\n        background: #f8fafc;\n        padding: 20px;\n        border-radius: 12px;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .progress-label {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 10px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n    }\n    \n    .progress-bar {\n        background: #e2e8f0;\n        border-radius: 12px;\n        height: 16px;\n        overflow: hidden;\n        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);\n    }\n    \n    .progress-fill {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 3s infinite;\n    }\n    \n    .turno-info {\n        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);\n        padding: 16px 20px;\n        border-radius: 12px;\n        margin-bottom: 20px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n        border: 1px solid #e2e8f0;\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n</style>\n\n<div class=\"dashboard-container\">\n    <div class=\"kpi-header\">\n        📊 KPIs EN TIEMPO REAL\n    </div>\n    \n    <div v-if=\"msg.payload\">\n        <div class=\"turno-info\">\n            <strong>Turno {{msg.payload.turno}}</strong> | Hora {{msg.payload.hora}}/8 | Staffing: {{msg.payload.staffing}}\n        </div>\n        \n        <div class=\"kpi-grid\">\n            <div class=\"kpi-card meta\">\n                <div class=\"kpi-label\">Meta por Hora</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_hora}}</div>\n            </div>\n            <div class=\"kpi-card real\">\n                <div class=\"kpi-label\">Producción Actual</div>\n                <div class=\"kpi-value\">{{msg.payload.real_hora}}</div>\n            </div>\n            <div class=\"kpi-card acum\">\n                <div class=\"kpi-label\">Meta Acumulada</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</div>\n            </div>\n            <div class=\"kpi-card\">\n                <div class=\"kpi-label\">Real Acumulado</div>\n                <div class=\"kpi-value\">{{msg.payload.real_turno_acum}}</div>\n            </div>\n        </div>\n        \n        <div class=\"progress-section\">\n            <div class=\"progress-label\">\n                <span>Progreso del Turno</span>\n                <span>{{Math.round((msg.payload.hora/8)*100)}}%</span>\n            </div>\n            <div class=\"progress-bar\">\n                <div class=\"progress-fill\" :style=\"{ width: (msg.payload.hora/8)*100 + '%' }\"></div>\n            </div>\n        </div>\n    </div>\n    <div v-else>\n        <div style=\"text-align: center; color: #64748b; padding: 40px;\">\n            <div style=\"font-size: 3em; margin-bottom: 16px;\">⏳</div>\n            Esperando datos de simulación...\n        </div>\n    </div>\n</div>",
+>>>>>>> Stashed changes
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+<<<<<<< Updated upstream
         "x": 710,
         "y": 400,
         "wires": [
             [
                 "3daa990ceced0393"
+=======
+        "x": 890,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6ad831d3dd815a8d",
+        "type": "switch",
+        "z": "ba2c364934eb086e",
+        "name": "¿Hubo Desviación? (<90%)",
+        "property": "payload.hubo_desviacion",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 860,
+        "y": 260,
+        "wires": [
+            [
+                "ef05b9b396e07759"
+            ]
+        ]
+    },
+    {
+        "id": "7769296a9efdc9f6",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Formatear Gráfico (por Turno)",
+        "func": "// msg.payload = { turno: 1, meta: X, real: Y, ... }\nlet p = msg.payload;\nlet category = `T${p.turno}`; // La etiqueta para el eje X, ej: \"T1\"\n\n// Mensaje para la barra \"Real\"\nlet msg_real = {\n    topic: \"Producción Real\",\n    payload: {\n        x: category,\n        y: p.real\n    }\n};\n\n// Mensaje para la barra \"Meta\"\nlet msg_meta = {\n    topic: \"Meta de Turno\",\n    payload: {\n        x: category,\n        y: p.meta\n    }\n};\n\n// Retorna un array de mensajes.\n// El ui-chart los recibirá y los ploteará como dos barras\n// en la misma categoría (ej. \"T1\")\nreturn [msg_real, msg_meta];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 880,
+        "y": 360,
+        "wires": [
+            [
+                "e711f807d9565d21"
+            ]
+        ]
+    },
+    {
+        "id": "b4e5f30ea2da98ce",
+        "type": "change",
+        "z": "ba2c364934eb086e",
+        "name": "set flow.staffing",
+        "rules": [
+            {
+                "t": "set",
+                "p": "staffing",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 500,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "86c39f03d41de4f5",
+        "type": "change",
+        "z": "ba2c364934eb086e",
+        "name": "set flow.meta_hora",
+        "rules": [
+            {
+                "t": "set",
+                "p": "meta_hora",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 550,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5b8abaa838e6b635",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Manejar Agregar Celda",
+        "func": "// Obtener el array actual de celdas\nlet celdas = flow.get(\"celdas\") || [];\n\n// Crear una nueva celda\nlet nuevoId = celdas.length > 0 ? Math.max(...celdas.map(c => c.id)) + 1 : 1;\nlet nuevaCelda = {\n    id: nuevoId,\n    estado: \"parada\",\n    unid_ok_hora: 0,\n    unid_ok_total_turno: 0,\n    tiempo_ciclo: 10 + Math.floor(Math.random() * 10), // Tiempo ciclo aleatorio entre 10-19\n    utilizacion: 0,\n    tiempo_espera: 0,\n    horas_trabajadas: 0\n};\n\n// Agregar la nueva celda\nceldas.push(nuevaCelda);\n\n// Guardar en el flow\nflow.set(\"celdas\", celdas);\n\n// Enviar mensaje para actualizar el grid\nlet msg_grid = { payload: celdas };\nreturn [msg_grid];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 40,
+        "wires": [
+            [
+                "3a79115d5dfc9328"
+            ]
+        ]
+    },
+    {
+        "id": "ebfa756e87297731",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Manejar Eliminar Celda",
+        "func": "let celdas = flow.get(\"celdas\") || [];\nlet id = msg.payload.id;\n\n// Eliminar la celda con el id\nceldas = celdas.filter(c => c.id !== id);\n\n// Guardar el nuevo array\nflow.set(\"celdas\", celdas);\n\n// Enviar el nuevo array al grid\nlet msg_grid = { payload: celdas };\nreturn [msg_grid];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 570,
+        "y": 80,
+        "wires": [
+            [
+                "3a79115d5dfc9328"
+>>>>>>> Stashed changes
             ]
         ]
     }
