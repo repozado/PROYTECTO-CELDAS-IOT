@@ -239,7 +239,7 @@
         "groupType": "default"
     },
     {
-        "id": "d8a535ff3ee096d2",
+        "id": "092a69997c1a4cfc",
         "type": "inject",
         "z": "3621d9ebf4c24432",
         "name": "Simular 1 Hora (cada 5 seg)",
@@ -255,16 +255,16 @@
         "topic": "",
         "payload": "tick",
         "payloadType": "str",
-        "x": 250,
+        "x": 270,
         "y": 120,
         "wires": [
             [
-                "a9d6f0869f9a89f3"
+                "577c9c1f255be96d"
             ]
         ]
     },
     {
-        "id": "a9d6f0869f9a89f3",
+        "id": "577c9c1f255be96d",
         "type": "function",
         "z": "3621d9ebf4c24432",
         "name": "Motor de Simulación (Gemelo Digital)",
@@ -275,23 +275,23 @@
         "initialize": "// Código de inicialización (opcional)\nflow.set(\"celdas\", undefined);\nflow.set(\"estado_sim\", undefined);",
         "finalize": "",
         "libs": [],
-        "x": 540,
+        "x": 560,
         "y": 120,
         "wires": [
             [
-                "20eaeed9b5950649"
+                "2bf32286cf0ba4de"
             ],
             [
-                "78f847ba8bf9a327"
+                "bd56dacd50afec65"
             ],
             [
-                "8654ef48084a0430",
-                "911e6390ac4c8d0c"
+                "06aa3696ddf7af08",
+                "df0a479cae67c942"
             ]
         ]
     },
     {
-        "id": "20eaeed9b5950649",
+        "id": "2bf32286cf0ba4de",
         "type": "ui-template",
         "z": "3621d9ebf4c24432",
         "group": "9ee96193c7db482b",
@@ -301,20 +301,20 @@
         "order": 1,
         "width": 0,
         "height": 0,
-        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Un poco más ancho */\n        gap: 10px;\n        padding: 10px;\n    }\n    .celda {\n        border: 1px solid #444;\n        border-radius: 5px;\n        padding: 10px;\n        text-align: center;\n        color: #333;\n        transition: background-color 0.3s ease;\n        height: 180px; /* Un poco más alto para los KPIs */\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n    }\n    .celda-title {\n        font-weight: bold;\n        font-size: 1.1em;\n        border-bottom: 1px solid rgba(0,0,0,0.2);\n        margin-bottom: 5px;\n        padding-bottom: 5px;\n    }\n    /* Contenedor KPIs inferiores */\n    .celda-kpis-bottom {\n        font-size: 0.8em; /* Más pequeño */\n        text-align: left;\n        margin-top: 8px;\n        line-height: 1.3;\n        color: rgba(0,0,0,0.7); /* Color texto KPIs */\n    }\n    .celda-kpis-bottom b {\n         color: rgba(0,0,0,0.9); /* Color etiquetas KPIs */\n    }\n\n    /* Icono grande para el proceso o estado */\n    .proceso-icon {\n        font-size: 2.5em; /* Icono grande */\n        line-height: 1.2;\n        flex-grow: 1; /* Ocupa espacio disponible */\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        min-height: 40px; /* Altura mínima para el icono */\n    }\n\n    /* Barra de progreso del PROCESO */\n    .proceso-progreso-container {\n        background-color: rgba(0,0,0,0.3);\n        border-radius: 4px;\n        height: 10px;\n        width: 100%;\n        margin-top: 5px;\n        border: 1px solid rgba(0,0,0,0.2);\n        overflow: hidden;\n    }\n    .proceso-progreso-value {\n        background-color: #FFF;\n        opacity: 0.8;\n        height: 100%;\n        transition: width 0.3s ease;\n    }\n    .progreso-text {\n        font-size: 0.8em;\n        font-weight: bold;\n        color: rgba(255,255,255,0.9);\n        margin-top: 2px;\n    }\n    .estado-text { /* Para mostrar texto de estado (PARADA, ESPERANDO...) */\n         font-weight: bold;\n         margin-top: 10px;\n         font-size: 0.9em;\n    }\n\n\n    /* Clases de estado (Fondo) */\n    .celda-estado-trabajando { background-color: #2a9d8f; color: white; }\n    .celda-estado-parada { background-color: #e76f51; color: white; }\n    .celda-estado-esperando { background-color: #e9c46a; color: black; }\n    .celda-estado-sin_personal { background-color: #607D8B; color: white; }\n\n    /* Ajuste color KPIs en fondos oscuros */\n    .celda-estado-trabajando .celda-kpis-bottom,\n    .celda-estado-parada .celda-kpis-bottom,\n    .celda-estado-sin_personal .celda-kpis-bottom {\n        color: rgba(255,255,255,0.7);\n    }\n     .celda-estado-trabajando .celda-kpis-bottom b,\n    .celda-estado-parada .celda-kpis-bottom b,\n    .celda-estado-sin_personal .celda-kpis-bottom b {\n        color: rgba(255,255,255,0.9);\n    }\n\n</style>\n\n<div class=\"grid-container\">\n\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n\n        <div style=\"flex-grow: 1; display: flex; flex-direction: column; justify-content: center;\">\n            <div v-if=\"celda.estado === 'trabajando'\">\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.proceso === 'corte'\">✂️</span>\n                    <span v-else-if=\"celda.proceso === 'costura'\">🧵</span>\n                    <span v-else-if=\"celda.proceso === 'inspeccion'\">🔍</span>\n                    <span v-else-if=\"celda.proceso === 'empaque'\">📦</span>\n                </div>\n                <div class=\"progreso-text\">{{celda.proceso.toUpperCase()}}</div>\n                <div class=\"proceso-progreso-container\">\n                    <div class=\"proceso-progreso-value\" :style=\"{ width: celda.progreso + '%' }\"></div>\n                </div>\n            </div>\n            <div v-else>\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.estado === 'parada'\">⚠️</span>\n                    <span v-else-if=\"celda.estado === 'esperando'\">⏳</span>\n                    <span v-else-if=\"celda.estado === 'sin_personal'\">🚫</span>\n                </div>\n                 <div class=\"estado-text\">{{celda.estado.toUpperCase()}}</div>\n            </div>\n        </div>\n\n        <div class=\"celda-kpis-bottom\">\n            <div><b>Prod. Turno:</b> {{celda.unid_ok_total_turno}}</div>\n            <div><b>Util (%):</b> {{celda.utilizacion.toFixed(1)}}%</div>\n            <div><b>Espera (h):</b> {{celda.tiempo_espera}}</div>\n        </div>\n\n    </div>\n</div>",
+        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));\n        gap: 15px;\n        padding: 15px;\n        perspective: 1000px;\n    }\n    \n    .celda {\n        border-radius: 16px;\n        padding: 16px;\n        text-align: center;\n        color: #333;\n        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);\n        height: 200px;\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n        position: relative;\n        overflow: hidden;\n        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);\n        transform-style: preserve-3d;\n    }\n    \n    /* Efectos de iluminación para cada estado */\n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 4px;\n        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);\n        transform: translateX(-100%);\n        transition: transform 0.6s ease;\n    }\n    \n    .celda:hover::before {\n        transform: translateX(100%);\n    }\n    \n    .celda:hover {\n        transform: translateY(-5px) rotateX(5deg);\n        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);\n    }\n    \n    .celda-title {\n        font-weight: 700;\n        font-size: 1.1em;\n        margin-bottom: 8px;\n        padding-bottom: 8px;\n        border-bottom: 2px solid rgba(255,255,255,0.3);\n        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);\n        letter-spacing: 0.5px;\n    }\n    \n    .celda-kpis-bottom {\n        font-size: 0.75em;\n        text-align: left;\n        margin-top: 10px;\n        line-height: 1.4;\n        color: rgba(255,255,255,0.85);\n        background: rgba(0,0,0,0.2);\n        padding: 8px;\n        border-radius: 8px;\n        backdrop-filter: blur(5px);\n    }\n    \n    .celda-kpis-bottom b {\n        color: rgba(255,255,255,0.95);\n        font-weight: 600;\n    }\n\n    /* Icono grande para el proceso o estado */\n    .proceso-icon {\n        font-size: 3em;\n        line-height: 1.2;\n        flex-grow: 1;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        min-height: 50px;\n        filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));\n        transition: transform 0.3s ease;\n    }\n    \n    .celda:hover .proceso-icon {\n        transform: scale(1.1);\n    }\n\n    /* Barra de progreso mejorada */\n    .proceso-progreso-container {\n        background-color: rgba(0,0,0,0.3);\n        border-radius: 10px;\n        height: 12px;\n        width: 100%;\n        margin-top: 8px;\n        border: 1px solid rgba(255,255,255,0.2);\n        overflow: hidden;\n        box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);\n    }\n    \n    .proceso-progreso-value {\n        height: 100%;\n        transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);\n        border-radius: 8px;\n        position: relative;\n        overflow: hidden;\n    }\n    \n    /* Efecto de brillo en la barra de progreso */\n    .proceso-progreso-value::after {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: -100%;\n        width: 100%;\n        height: 100%;\n        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);\n        animation: shimmer 2s infinite;\n    }\n    \n    @keyframes shimmer {\n        0% { left: -100%; }\n        100% { left: 100%; }\n    }\n    \n    .progreso-text {\n        font-size: 0.85em;\n        font-weight: 700;\n        color: rgba(255,255,255,0.95);\n        margin-top: 5px;\n        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);\n    }\n    \n    .estado-text {\n        font-weight: 700;\n        margin-top: 12px;\n        font-size: 0.9em;\n        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);\n    }\n\n    /* Estados con formas y animaciones específicas */\n    \n    /* TRABAJANDO - Forma hexagonal con animación de pulso */\n    .celda-estado-trabajando { \n        background: linear-gradient(135deg, #2a9d8f, #1a7c6f);\n        color: white;\n        animation: pulse-working 3s infinite;\n        clip-path: polygon(0 10%, 50% 0, 100% 10%, 100% 90%, 50% 100%, 0 90%);\n    }\n    \n    @keyframes pulse-working {\n        0%, 100% { box-shadow: 0 6px 20px rgba(42, 157, 143, 0.4); }\n        50% { box-shadow: 0 6px 30px rgba(42, 157, 143, 0.7); }\n    }\n    \n    .celda-estado-trabajando .proceso-progreso-value {\n        background: linear-gradient(90deg, #4cc9b8, #83e6d6, #4cc9b8);\n        background-size: 200% 100%;\n        animation: gradient-shift 3s infinite;\n    }\n    \n    /* PARADA - Forma de escudo con parpadeo */\n    .celda-estado-parada { \n        background: linear-gradient(135deg, #e76f51, #d6452b);\n        color: white;\n        animation: blink-alert 2s infinite;\n        clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);\n    }\n    \n    @keyframes blink-alert {\n        0%, 50% { opacity: 1; }\n        51%, 100% { opacity: 0.8; }\n    }\n    \n    .celda-estado-parada .proceso-progreso-value {\n        background: linear-gradient(90deg, #ff8a78, #ffb3a7, #ff8a78);\n    }\n    \n    /* ESPERANDO - Forma circular con rotación */\n    .celda-estado-esperando { \n        background: linear-gradient(135deg, #e9c46a, #d4af37);\n        color: black;\n        border-radius: 50%;\n        animation: rotate-slow 20s infinite linear;\n    }\n    \n    @keyframes rotate-slow {\n        0% { transform: rotate(0deg); }\n        100% { transform: rotate(360deg); }\n    }\n    \n    .celda-estado-esperando .proceso-progreso-value {\n        background: linear-gradient(90deg, #f4d886, #ffe8a8, #f4d886);\n    }\n    \n    /* SIN PERSONAL - Forma de rombo con efecto de desvanecimiento */\n    .celda-estado-sin_personal { \n        background: linear-gradient(135deg, #607D8B, #455a64);\n        color: white;\n        clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);\n        animation: fade-in-out 4s infinite;\n    }\n    \n    @keyframes fade-in-out {\n        0%, 100% { opacity: 0.7; }\n        50% { opacity: 1; }\n    }\n    \n    .celda-estado-sin_personal .proceso-progreso-value {\n        background: linear-gradient(90deg, #8eacbb, #b0bec5, #8eacbb);\n    }\n    \n    /* Animación para el gradiente de las barras */\n    @keyframes gradient-shift {\n        0% { background-position: 0% 50%; }\n        50% { background-position: 100% 50%; }\n        100% { background-position: 0% 50%; }\n    }\n    \n    /* Ajuste para los KPIs en todos los estados */\n    .celda-estado-trabajando .celda-kpis-bottom,\n    .celda-estado-parada .celda-kpis-bottom,\n    .celda-estado-esperando .celda-kpis-bottom,\n    .celda-estado-sin_personal .celda-kpis-bottom {\n        color: rgba(255,255,255,0.85);\n    }\n    \n    .celda-estado-trabajando .celda-kpis-bottom b,\n    .celda-estado-parada .celda-kpis-bottom b,\n    .celda-estado-esperando .celda-kpis-bottom b,\n    .celda-estado-sin_personal .celda-kpis-bottom b {\n        color: rgba(255,255,255,0.95);\n    }\n    \n    /* Ajuste específico para estado esperando (texto oscuro) */\n    .celda-estado-esperando .celda-kpis-bottom {\n        color: rgba(0,0,0,0.8);\n    }\n    \n    .celda-estado-esperando .celda-kpis-bottom b {\n        color: rgba(0,0,0,0.9);\n    }\n\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n\n        <div style=\"flex-grow: 1; display: flex; flex-direction: column; justify-content: center;\">\n            <div v-if=\"celda.estado === 'trabajando'\">\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.proceso === 'corte'\">✂️</span>\n                    <span v-else-if=\"celda.proceso === 'costura'\">🧵</span>\n                    <span v-else-if=\"celda.proceso === 'inspeccion'\">🔍</span>\n                    <span v-else-if=\"celda.proceso === 'empaque'\">📦</span>\n                </div>\n                <div class=\"progreso-text\">{{celda.proceso.toUpperCase()}}</div>\n                <div class=\"proceso-progreso-container\">\n                    <div class=\"proceso-progreso-value\" :style=\"{ width: celda.progreso + '%' }\"></div>\n                </div>\n            </div>\n            <div v-else>\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.estado === 'parada'\">⚠️</span>\n                    <span v-else-if=\"celda.estado === 'esperando'\">⏳</span>\n                    <span v-else-if=\"celda.estado === 'sin_personal'\">🚫</span>\n                </div>\n                 <div class=\"estado-text\">{{celda.estado.toUpperCase()}}</div>\n            </div>\n        </div>\n\n        <div class=\"celda-kpis-bottom\">\n            <div><b>Prod. Turno:</b> {{celda.unid_ok_total_turno}}</div>\n            <div><b>Util (%):</b> {{celda.utilizacion.toFixed(1)}}%</div>\n            <div><b>Espera (h):</b> {{celda.tiempo_espera}}</div>\n        </div>\n    </div>\n</div>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 860,
+        "x": 880,
         "y": 40,
         "wires": [
             []
         ]
     },
     {
-        "id": "78f847ba8bf9a327",
+        "id": "bd56dacd50afec65",
         "type": "ui-template",
         "z": "3621d9ebf4c24432",
         "group": "48e8f35e2b9e8df4",
@@ -330,14 +330,14 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 880,
+        "x": 900,
         "y": 120,
         "wires": [
             []
         ]
     },
     {
-        "id": "b5c68a2c9e891800",
+        "id": "2715d7b2618e4659",
         "type": "ui-chart",
         "z": "3621d9ebf4c24432",
         "group": "c27610ac0e9c705d",
@@ -390,14 +390,14 @@
         "height": "4",
         "className": "",
         "interpolation": "linear",
-        "x": 1100,
+        "x": 1120,
         "y": 280,
         "wires": [
             []
         ]
     },
     {
-        "id": "8654ef48084a0430",
+        "id": "06aa3696ddf7af08",
         "type": "switch",
         "z": "3621d9ebf4c24432",
         "name": "¿Hubo Desviación? (<90%)",
@@ -411,16 +411,16 @@
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 830,
+        "x": 850,
         "y": 220,
         "wires": [
             [
-                "5ad60f66810e8019"
+                "7c8fc5d5d59c0884"
             ]
         ]
     },
     {
-        "id": "5ad60f66810e8019",
+        "id": "7c8fc5d5d59c0884",
         "type": "change",
         "z": "3621d9ebf4c24432",
         "name": "Preparar Msg de Alerta",
@@ -445,16 +445,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1050,
+        "x": 1070,
         "y": 180,
         "wires": [
             [
-                "0f2889b340ab6fec"
+                "f74fc21d8cfe1365"
             ]
         ]
     },
     {
-        "id": "0f2889b340ab6fec",
+        "id": "f74fc21d8cfe1365",
         "type": "ui-notification",
         "z": "3621d9ebf4c24432",
         "ui": "9477a706cabb673d",
@@ -471,12 +471,12 @@
         "raw": false,
         "className": "",
         "name": "Alerta de Desviación",
-        "x": 1290,
+        "x": 1310,
         "y": 180,
         "wires": []
     },
     {
-        "id": "132746da3fb3c28e",
+        "id": "19d5ec4f49d652ed",
         "type": "ui-number-input",
         "z": "3621d9ebf4c24432",
         "group": "6948a1a24a42f69c",
@@ -500,16 +500,16 @@
         "iconPosition": "left",
         "iconInnerPosition": "inside",
         "spinner": "default",
-        "x": 740,
+        "x": 760,
         "y": 440,
         "wires": [
             [
-                "0c12c9bd897fdae8"
+                "5162309f953c0f42"
             ]
         ]
     },
     {
-        "id": "38eba26c5609c82f",
+        "id": "ef37413e4b948ffa",
         "type": "change",
         "z": "3621d9ebf4c24432",
         "name": "set flow.staffing",
@@ -527,14 +527,14 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1050,
+        "x": 1070,
         "y": 380,
         "wires": [
             []
         ]
     },
     {
-        "id": "0c12c9bd897fdae8",
+        "id": "5162309f953c0f42",
         "type": "change",
         "z": "3621d9ebf4c24432",
         "name": "set flow.meta_hora",
@@ -552,14 +552,14 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1020,
+        "x": 1040,
         "y": 440,
         "wires": [
             []
         ]
     },
     {
-        "id": "911e6390ac4c8d0c",
+        "id": "df0a479cae67c942",
         "type": "function",
         "z": "3621d9ebf4c24432",
         "name": "Formatear Gráfico (por Turno)",
@@ -570,16 +570,16 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 850,
+        "x": 870,
         "y": 280,
         "wires": [
             [
-                "b5c68a2c9e891800"
+                "2715d7b2618e4659"
             ]
         ]
     },
     {
-        "id": "aa2252516cb29233",
+        "id": "9bb1e3d8d1b7898b",
         "type": "inject",
         "z": "3621d9ebf4c24432",
         "name": "Establecer Defaults (Deploy)",
@@ -595,17 +595,17 @@
         "topic": "",
         "payload": "true",
         "payloadType": "bool",
-        "x": 170,
+        "x": 190,
         "y": 400,
         "wires": [
             [
-                "f7d92e843440de4c",
-                "0f44583e0a868a2c"
+                "3fe6d29340e014b8",
+                "2531c77731b945cf"
             ]
         ]
     },
     {
-        "id": "f7d92e843440de4c",
+        "id": "3fe6d29340e014b8",
         "type": "change",
         "z": "3621d9ebf4c24432",
         "name": "Default Staffing: 3",
@@ -623,16 +623,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 470,
+        "x": 490,
         "y": 380,
         "wires": [
             [
-                "f0713f400aa376e3"
+                "f632e98a93ec671b"
             ]
         ]
     },
     {
-        "id": "0f44583e0a868a2c",
+        "id": "2531c77731b945cf",
         "type": "change",
         "z": "3621d9ebf4c24432",
         "name": "Default Meta: 5",
@@ -650,16 +650,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 460,
+        "x": 480,
         "y": 440,
         "wires": [
             [
-                "132746da3fb3c28e"
+                "19d5ec4f49d652ed"
             ]
         ]
     },
     {
-        "id": "f0713f400aa376e3",
+        "id": "f632e98a93ec671b",
         "type": "ui-template",
         "z": "3621d9ebf4c24432",
         "group": "6948a1a24a42f69c",
@@ -675,11 +675,11 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 760,
+        "x": 780,
         "y": 380,
         "wires": [
             [
-                "38eba26c5609c82f"
+                "ef37413e4b948ffa"
             ]
         ]
     },
