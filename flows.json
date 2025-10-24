@@ -410,8 +410,8 @@
         "initialize": "// Código de inicialización (opcional)\nflow.set(\"celdas\", undefined);\nflow.set(\"estado_sim\", undefined);\nflow.set(\"staffing\", 3);\nflow.set(\"meta_hora\", 5);",
         "finalize": "",
         "libs": [],
-        "x": 470,
-        "y": 120,
+        "x": 430,
+        "y": 80,
         "wires": [
             [
                 "5ebcae15a02df876"
