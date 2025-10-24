@@ -804,7 +804,7 @@
         "name": "Gráfico",
         "label": "Producción vs Meta por Turno",
         "order": 1,
-        "chartType": "bar",
+        "chartType": "line",
         "category": "",
         "categoryType": "none",
         "xAxisLabel": "Turnos",
