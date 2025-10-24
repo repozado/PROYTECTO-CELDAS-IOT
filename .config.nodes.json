@@ -731,5 +731,43 @@
                 "file": "C:\\IoT\\PROYTECTO-CELDAS-IOT\\node_modules\\@flowfuse\\node-red-dashboard\\nodes\\widgets\\ui_progress.js"
             }
         }
+    },
+    "@flowfuse/node-red-dashboard-2-ui-led": {
+        "name": "@flowfuse/node-red-dashboard-2-ui-led",
+        "version": "1.1.0",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "ui-led": {
+                "name": "ui-led",
+                "types": [
+                    "ui-led"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "@flowfuse/node-red-dashboard-2-ui-led",
+                "file": "C:\\IoT\\PROYTECTO-CELDAS-IOT\\node_modules\\@flowfuse\\node-red-dashboard-2-ui-led\\nodes\\ui-led.js"
+            }
+        }
+    },
+    "node-red-node-random": {
+        "name": "node-red-node-random",
+        "version": "0.4.1",
+        "local": true,
+        "user": true,
+        "nodes": {
+            "random": {
+                "name": "random",
+                "types": [
+                    "random"
+                ],
+                "enabled": true,
+                "local": true,
+                "user": false,
+                "module": "node-red-node-random",
+                "file": "C:\\IoT\\PROYTECTO-CELDAS-IOT\\node_modules\\node-red-node-random\\random.js"
+            }
+        }
     }
 }
