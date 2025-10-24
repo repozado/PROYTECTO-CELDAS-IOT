@@ -1,24 +1,16 @@
 [
     {
-        "id": "9ecbb3f80f61fce6",
-        "type": "tab",
-        "label": "Flujo 1",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
-        "id": "1f8fab03ad5a4d3c",
-        "type": "tab",
-        "label": "Simulador Textil (6 Celdas)",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "ba2c364934eb086e",
         "type": "tab",
         "label": "SIMULADOR TEXTIL 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "e74f59003df1920c",
+        "type": "tab",
+        "label": "Simulador Textil (6 Celdas)",
         "disabled": false,
         "info": "",
         "env": []
@@ -247,9 +239,507 @@
         "groupType": "default"
     },
     {
-        "id": "73f9c4c8ee0ef9bb",
+        "id": "a27f91298980485a",
         "type": "inject",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "ba2c364934eb086e",
+        "name": "Simular 1 Hora (cada 5 seg)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "tick",
+        "payloadType": "str",
+        "x": 220,
+        "y": 120,
+        "wires": [
+            [
+                "1985073158a037f7"
+            ]
+        ]
+    },
+    {
+        "id": "1985073158a037f7",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Motor de Simulación (Gemelo Digital)",
+        "func": "// --- 1. OBTENER ESTADO ANTERIOR (O INICIALIZAR) ---\nconst PROCESOS = ['corte', 'costura', 'inspeccion', 'empaque'];\n\nlet celdas = flow.get(\"celdas\") || [\n    { id: 1, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 2, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 12, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 3, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 8, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 4, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 5, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 15, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 6, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 }\n];\nlet estado_sim = flow.get(\"estado_sim\") || { hora_turno: 0, num_turno: 1, horas_totales: 0 };\n\n// --- 2. OBTENER PARÁMETROS DEL DASHBOARD ---\nlet staffing = flow.get(\"staffing\") || 3;\nlet meta_hora_por_celda = flow.get(\"meta_hora\") || 5;\n\n// --- 3. AVANZAR SIMULACIÓN 1 HORA ---\nestado_sim.hora_turno++;\nestado_sim.horas_totales++;\n\nlet produccion_total_hora = 0;\nlet produccion_total_turno_acumulada = 0;\n\n// --- 4. SIMULACIÓN POR CELDA (Flujo, KPIs) ---\nfor (let i = 0; i < celdas.length; i++) {\n    let celda = celdas[i];\n    celda.unid_ok_hora = 0; // Reseteamos la producción de esta hora\n    \n    // 4.1. Reasignación de Personal\n    if (i < staffing) {\n        \n        // 4.2. Simulación Cuello de Botella\n        if (celda.id === 2 && celdas[0].estado !== 'trabajando') {\n            celda.estado = 'esperando';\n            celda.tiempo_espera += 1;\n            celda.progreso = 0; // Pausa y resetea progreso si espera\n        } \n        // 4.3. Simulación de Falla Aleatoria\n        else if (celda.estado !== 'esperando') {\n            let rand = Math.random();\n            if (celda.estado === 'parada' && rand < 0.2) {\n                celda.estado = 'trabajando'; // 20% chance de repararse\n            }\n\n            if (celda.estado === 'trabajando') {\n                if (rand < 0.15) { // 15% chance de falla\n                    celda.estado = 'parada';\n                    celda.progreso = 0; // Resetea progreso al fallar\n                } else {\n                    // --- LÓGICA DE PROCESO TEXTIL ---\n                    celda.progreso += 25; // Avanza 25% por \"hora\" (tick)\n                    celda.horas_trabajadas += 1;\n                    \n                    if (celda.progreso >= 100) {\n                        celda.progreso = 0;\n                        let idx_actual = PROCESOS.indexOf(celda.proceso);\n                        \n                        if (idx_actual >= PROCESOS.length - 1) { // Si estaba en 'empaque'\n                            // Proceso terminado, 1 unidad producida\n                            celda.proceso = PROCESOS[0]; // Vuelve a 'corte'\n                            celda.unid_ok_hora = 1; \n                            celda.unid_ok_total_turno += 1;\n                        } else {\n                            celda.proceso = PROCESOS[idx_actual + 1]; // Avanza al siguiente proceso\n                        }\n                    }\n                    // --- FIN LÓGICA TEXTIL ---\n                }\n            } else if (celda.estado === 'parada') {\n                // Sigue en parada, no hace nada\n            }\n        }\n    } else {\n        // Celda NO tiene personal\n        celda.estado = 'sin_personal';\n        celda.progreso = 0;\n    }\n    \n    // 4.4. Calcular KPIs de Celda\n    if (estado_sim.hora_turno > 0) {\n        celda.utilizacion = (celda.horas_trabajadas / estado_sim.hora_turno) * 100;\n    } else {\n        celda.utilizacion = 0;\n    }\n    produccion_total_turno_acumulada += celda.unid_ok_total_turno;\n    produccion_total_hora += celda.unid_ok_hora;\n}\n\n// --- 5. PREPARAR SALIDAS (Dashboard) ---\n\n// Salida 1: Datos para el Grid de Celdas (se envía siempre)\nlet msg_grid = { payload: celdas };\n\n// Salida 2: Datos para la Tabla Comparativa (se envía siempre)\nlet meta_hora_total_staffed = meta_hora_por_celda * staffing;\nlet msg_tabla = { \n    payload: {\n        hora: estado_sim.hora_turno,\n        turno: estado_sim.num_turno,\n        staffing: staffing,\n        meta_hora: meta_hora_total_staffed,\n        real_hora: produccion_total_hora,\n        meta_turno_acum: meta_hora_total_staffed * estado_sim.hora_turno,\n        real_turno_acum: produccion_total_turno_acumulada\n    }\n};\n\nlet msg_turno_fin = null;\n\n// --- 6. AGREGACIÓN POR TURNO (Flujo) ---\nif (estado_sim.hora_turno >= 8) { // Asumimos turno de 8 horas\n    let meta_total_turno = meta_hora_total_staffed * 8;\n    let real_total_turno = produccion_total_turno_acumulada;\n    let cumplimiento = 0;\n    if (meta_total_turno > 0) {\n        cumplimiento = (real_total_turno / meta_total_turno) * 100;\n    }\n    \n    // 6.1. Preparar Salida 3: Datos de fin de turno (Gráfico y Alerta)\n    msg_turno_fin = {\n        payload: {\n            turno: estado_sim.num_turno,\n            meta: meta_total_turno,\n            real: real_total_turno,\n            cumplimiento: cumplimiento,\n            alerta_msg: cumplimiento < 90 ? \n                `ALERTA: Desviación en Turno ${estado_sim.num_turno}. Cumplimiento: ${cumplimiento.toFixed(1)}%` : \n                `Turno ${estado_sim.num_turno} OK. Cumplimiento: ${cumplimiento.toFixed(1)}%`,\n            hubo_desviacion: cumplimiento < 90\n        }\n    };\n    \n    // 6.3. Resetear para el siguiente turno\n    estado_sim.hora_turno = 0;\n    estado_sim.num_turno++;\n    for (let celda of celdas) {\n        celda.unid_ok_total_turno = 0;\n        celda.horas_trabajadas = 0;\n        celda.tiempo_espera = 0;\n        celda.utilizacion = 0;\n        celda.progreso = 0;\n        celda.proceso = 'corte';\n    }\n}\n\n// --- 7. GUARDAR ESTADO PARA PRÓXIMO TICK ---\nflow.set(\"celdas\", celdas);\nflow.set(\"estado_sim\", estado_sim);\n\n// Retornar mensajes a las 3 salidas del nodo\nreturn [ msg_grid, msg_tabla, msg_turno_fin ];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Código de inicialización (opcional)\nflow.set(\"celdas\", undefined);\nflow.set(\"estado_sim\", undefined);",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 120,
+        "wires": [
+            [
+                "c1c7780aae039ad1"
+            ],
+            [
+                "98b0c790b63cfeb6"
+            ],
+            [
+                "199017b3bfed8f95",
+                "ab753daf901837b7"
+            ]
+        ]
+    },
+    {
+        "id": "c1c7780aae039ad1",
+        "type": "ui-template",
+        "z": "ba2c364934eb086e",
+        "group": "2ae92a9af38a7961",
+        "page": "",
+        "ui": "",
+        "name": "Grid de Celdas (Proceso Textil)",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));\n        gap: 10px;\n        padding: 10px;\n    }\n    .celda {\n        border: 1px solid #444;\n        border-radius: 5px;\n        padding: 10px;\n        text-align: center;\n        color: #333;\n        transition: background-color 0.3s ease;\n        height: 150px; /* Damos altura fija */\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n    }\n    .celda-title {\n        font-weight: bold;\n        font-size: 1.1em;\n        border-bottom: 1px solid rgba(0,0,0,0.2);\n        margin-bottom: 5px;\n        padding-bottom: 5px;\n    }\n    .celda-kpi {\n        font-size: 0.9em;\n        text-align: left;\n        margin-top: 3px;\n    }\n    \n    /* Icono grande para el proceso o estado */\n    .proceso-icon {\n        font-size: 2.5em; /* Icono grande */\n        line-height: 1.2;\n        flex-grow: 1;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n    }\n\n    /* Barra de progreso del PROCESO */\n    .proceso-progreso-container {\n        background-color: rgba(0,0,0,0.3);\n        border-radius: 4px;\n        height: 10px;\n        width: 100%;\n        margin-top: 5px;\n        border: 1px solid rgba(0,0,0,0.2);\n        overflow: hidden;\n    }\n    .proceso-progreso-value {\n        background-color: #FFF;\n        opacity: 0.8;\n        height: 100%;\n        transition: width 0.3s ease;\n    }\n    .progreso-text {\n        font-size: 0.8em;\n        font-weight: bold;\n        color: rgba(255,255,255,0.9);\n    }\n\n    /* Clases de estado (Fondo) */\n    .celda-estado-trabajando { background-color: #2a9d8f; color: white; }\n    .celda-estado-parada { background-color: #e76f51; color: white; }\n    .celda-estado-esperando { background-color: #e9c46a; color: black; }\n    .celda-estado-sin_personal { background-color: #607D8B; color: white; }\n</style>\n\n<div class=\"grid-container\">\n    \n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        \n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n\n        \n        <div v-if=\"celda.estado === 'trabajando'\" style=\"flex-grow: 1;\">\n            <div class=\"proceso-icon\">\n                <span v-if=\"celda.proceso === 'corte'\">✂️</span>\n                <span v-else-if=\"celda.proceso === 'costura'\">🧵</span>\n                <span v-else-if=\"celda.proceso === 'inspeccion'\">🔍</span>\n                <span v-else-if=\"celda.proceso === 'empaque'\">📦</span>\n            </div>\n            <div class=\"progreso-text\">{{celda.proceso.toUpperCase()}}</div>\n            <div class=\"proceso-progreso-container\">\n                <div class=\"proceso-progreso-value\" :style=\"{ width: celda.progreso + '%' }\"></div>\n            </div>\n        </div>\n\n        \n        <div v-else style=\"flex-grow: 1;\">\n            <div class=\"proceso-icon\">\n                <span v-if=\"celda.estado === 'parada'\">⚠️</span>\n                <span v-else-if=\"celda.estado === 'esperando'\">⏳</span>\n                <span v-else-if=\"celda.estado === 'sin_personal'\">🚫</span>\n            </div>\n            <div style=\"font-weight: bold; margin-top: 10px;\">{{celda.estado.toUpperCase()}}</div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n           Prod. Turno: <b>{{celda.unid_ok_total_turno}}</b>\n        </div>\n    </div>\n</div>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 850,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "98b0c790b63cfeb6",
+        "type": "ui-template",
+        "z": "ba2c364934eb086e",
+        "group": "81867aea22c8ac4c",
+        "page": "",
+        "ui": "",
+        "name": "Tabla comparativa metas vs real",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "format": "<style>\n    .kpi-table {\n        width: 100%;\n        border-collapse: collapse;\n    }\n    .kpi-table td {\n        padding: 8px 10px;\n        border-bottom: 1px solid #444;\n        font-size: 1.0em;\n    }\n    .kpi-label {\n        font-weight: bold;\n        color: #505050;\n        width: 60%;\n    }\n    .kpi-value {\n        text-align: right;\n        font-family: monospace;\n        font-size: 1.1em;\n        font-weight: bold;\n    }\n</style>\n\n<div v-if=\"msg.payload\">\n    <h4 style=\"margin-top:0; margin-bottom: 10px;\">Turno {{msg.payload.turno}} (Hora {{msg.payload.hora}}/8)</h4>\n    <table class=\"kpi-table\">\n        <tr>\n            <td class=\"kpi-label\">Personal (Staffing)</td>\n            <td class=\"kpi-value\">{{msg.payload.staffing}}</td>\n        </tr>\n        <tr>\n            <td class=\"kpi-label\">Meta por Hora (Total)</td>\n            <td class=\"kpi-value\">{{msg.payload.meta_hora}}</td>\n        </tr>\n        <tr>\n            <td class=\"kpi-label\">Producción Hora Actual</td>\n            <td class=\"kpi-value\">{{msg.payload.real_hora}}</td>\n        </tr>\n        <tr>\n            <td class=\"kpi-label\">Meta Acum. Turno</td>\n            <td class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</td>\n        </tr>\n        <tr>\n            <td class=\"kpi-label\">Real Acum. Turno</td>\n            <td class=\"kpi-value\">{{msg.payload.real_turno_acum}}</td>\n        </tr>\n    </table>\n</div>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 830,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "84e3fdf1fb3598f9",
+        "type": "ui-chart",
+        "z": "ba2c364934eb086e",
+        "group": "db6adb7ea7e9c1ec",
+        "name": "Gráfico",
+        "label": "Producción vs Meta por Turno",
+        "order": 1,
+        "chartType": "bar",
+        "category": "",
+        "categoryType": "none",
+        "xAxisLabel": "Turnos",
+        "xAxisProperty": "payload.x",
+        "xAxisPropertyType": "msg",
+        "xAxisType": "category",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "Unidades Producidas",
+        "yAxisProperty": "payload.y",
+        "yAxisPropertyType": "msg",
+        "ymin": "",
+        "ymax": "",
+        "bins": "",
+        "stackSeries": false,
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "10",
+        "removeOlderUnit": "points",
+        "removeOlderPoints": "",
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": "6",
+        "height": "4",
+        "className": "",
+        "interpolation": "linear",
+        "x": 1070,
+        "y": 280,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "199017b3bfed8f95",
+        "type": "switch",
+        "z": "ba2c364934eb086e",
+        "name": "¿Hubo Desviación? (<90%)",
+        "property": "payload.hubo_desviacion",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 800,
+        "y": 180,
+        "wires": [
+            [
+                "7315dc285f7bb035"
+            ]
+        ]
+    },
+    {
+        "id": "7315dc285f7bb035",
+        "type": "change",
+        "z": "ba2c364934eb086e",
+        "name": "Preparar Msg de Alerta",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.alerta_msg",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "Alerta de Producción",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1070,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2ab3a0cd95ee8936",
+        "type": "inject",
+        "z": "ba2c364934eb086e",
+        "name": "Simular 1 Hora (cada 5 seg)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "tick",
+        "payloadType": "str",
+        "x": 160,
+        "y": 160,
+        "wires": [
+            [
+                "ef31ea9b8cf3d64b"
+            ]
+        ]
+    },
+    {
+        "id": "ef31ea9b8cf3d64b",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Motor de Simulación (Gemelo Digital)",
+        "func": "// --- 1. OBTENER ESTADO ANTERIOR (O INICIALIZAR) ---\nlet celdas = flow.get(\"celdas\") || [\n    { id: 1, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 2, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 12, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 3, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 8, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 4, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 5, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 15, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 }\n];\nlet estado_sim = flow.get(\"estado_sim\") || { hora_turno: 0, num_turno: 1, horas_totales: 0 };\n\n// --- 2. OBTENER PARÁMETROS DEL DASHBOARD ---\nlet staffing = flow.get(\"staffing\") || 3;\nlet meta_hora_por_celda = flow.get(\"meta_hora\") || 5;\n\n// --- 3. AVANZAR SIMULACIÓN 1 HORA ---\nestado_sim.hora_turno++;\nestado_sim.horas_totales++;\n\nlet produccion_total_hora = 0;\nlet produccion_total_turno_acumulada = 0;\n\n// --- 4. SIMULACIÓN POR CELDA (Flujo, KPIs) ---\nfor (let i = 0; i < celdas.length; i++) {\n    let celda = celdas[i];\n\n    // 4.1. Reasignación de Personal (Ampliación \"Qué-pasa-si\")\n    if (i < staffing) {\n        // Celda TIENE personal.\n\n        // 4.2. Simulación Cuello de Botella (Objetivo)\n        // Celda 2 depende de Celda 1.\n        if (celda.id === 2 && celdas[0].estado !== 'trabajando') {\n            celda.estado = 'esperando';\n            celda.tiempo_espera += 1; // KPI: Tiempos de espera\n            celda.unid_ok_hora = 0;\n        }\n        // 4.3. Simulación de Falla Aleatoria (para celdas que no están esperando)\n        else if (celda.estado !== 'esperando') {\n            let rand = Math.random();\n            if (rand < 0.85) { // 85% chance de trabajar\n                celda.estado = 'trabajando';\n                // Calcular producción de la hora\n                celda.unid_ok_hora = Math.floor(60 / celda.tiempo_ciclo);\n                celda.unid_ok_total_turno += celda.unid_ok_hora;\n                celda.horas_trabajadas += 1;\n            } else { // 15% chance de falla\n                celda.estado = 'parada';\n                celda.unid_ok_hora = 0;\n            }\n        }\n    } else {\n        // Celda NO tiene personal\n        celda.estado = 'sin_personal';\n        celda.unid_ok_hora = 0;\n    }\n\n    // 4.4. Calcular KPIs de Celda (Variables)\n    // Prevenir división por cero en el primer tick del reseteo\n    if (estado_sim.hora_turno > 0) {\n        celda.utilizacion = (celda.horas_trabajadas / estado_sim.hora_turno) * 100; // KPI: Utilización\n    } else {\n        celda.utilizacion = 0;\n    }\n    produccion_total_turno_acumulada += celda.unid_ok_total_turno;\n    produccion_total_hora += celda.unid_ok_hora;\n}\n\n// --- 5. PREPARAR SALIDAS (Dashboard) ---\n\n// Salida 1: Datos para el Grid de Celdas (se envía siempre)\nlet msg_grid = { payload: celdas };\n\n// Salida 2: Datos para la Tabla Comparativa (se envía siempre)\nlet meta_hora_total_staffed = meta_hora_por_celda * staffing;\nlet msg_tabla = {\n    payload: {\n        hora: estado_sim.hora_turno,\n        turno: estado_sim.num_turno,\n        staffing: staffing,\n        meta_hora: meta_hora_total_staffed,\n        real_hora: produccion_total_hora,\n        meta_turno_acum: meta_hora_total_staffed * estado_sim.hora_turno,\n        real_turno_acum: produccion_total_turno_acumulada\n    }\n};\n\nlet msg_turno_fin = null;\n\n// --- 6. AGREGACIÓN POR TURNO (Flujo) ---\nif (estado_sim.hora_turno >= 8) { // Asumimos turno de 8 horas\n    let meta_total_turno = meta_hora_total_staffed * 8;\n    let real_total_turno = produccion_total_turno_acumulada;\n    let cumplimiento = 0;\n    if (meta_total_turno > 0) {\n        cumplimiento = (real_total_turno / meta_total_turno) * 100;\n    }\n\n    // 6.1. Preparar Salida 3: Datos de fin de turno (Gráfico y Alerta)\n    msg_turno_fin = {\n        payload: {\n            turno: estado_sim.num_turno,\n            meta: meta_total_turno,\n            real: real_total_turno,\n            cumplimiento: cumplimiento,\n            // Mensaje para la alerta\n            alerta_msg: cumplimiento < 90 ?\n                `⚠️ ALERTA: Desviación en Turno ${estado_sim.num_turno}. Cumplimiento: ${cumplimiento.toFixed(1)}%` :\n                `✅ Turno ${estado_sim.num_turno} OK. Cumplimiento: ${cumplimiento.toFixed(1)}%`,\n            // Flag para el switch de alerta\n            hubo_desviacion: cumplimiento < 90\n        }\n    };\n\n    // 6.3. Resetear para el siguiente turno\n    estado_sim.hora_turno = 0;\n    estado_sim.num_turno++;\n    for (let celda of celdas) {\n        celda.unid_ok_total_turno = 0;\n        celda.horas_trabajadas = 0;\n        celda.tiempo_espera = 0;\n        celda.utilizacion = 0;\n    }\n}\n\n// --- 7. GUARDAR ESTADO PARA PRÓXIMO TICK ---\nflow.set(\"celdas\", celdas);\nflow.set(\"estado_sim\", estado_sim);\n\n// Retornar mensajes a las 3 salidas del nodo\nreturn [msg_grid, msg_tabla, msg_turno_fin];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Código de inicialización (opcional)\nflow.set(\"celdas\", undefined);\nflow.set(\"estado_sim\", undefined);\nflow.set(\"staffing\", 3);\nflow.set(\"meta_hora\", 5);",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 160,
+        "wires": [
+            [],
+            [
+                "d7b8763986e7cd06"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "d7b8763986e7cd06",
+        "type": "ui-template",
+        "z": "ba2c364934eb086e",
+        "group": "81867aea22c8ac4c",
+        "page": "",
+        "ui": "",
+        "name": "Alerta de Desviación 2",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "format": "<style>\n    .dashboard-container {\n        background: white;\n        border-radius: 16px;\n        padding: 24px;\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        font-family: 'Segoe UI', system-ui, sans-serif;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .kpi-header {\n        font-size: 1.3em;\n        font-weight: 800;\n        color: #1e293b;\n        margin-bottom: 24px;\n        padding-bottom: 16px;\n        border-bottom: 3px solid #f1f5f9;\n        display: flex;\n        align-items: center;\n        gap: 12px;\n        letter-spacing: -0.5px;\n    }\n    \n    .kpi-grid {\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n        gap: 20px;\n        margin-bottom: 24px;\n    }\n    \n    .kpi-card {\n        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);\n        padding: 20px;\n        border-radius: 12px;\n        border-left: 5px solid #3b82f6;\n        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        border: 1px solid #f1f5f9;\n    }\n    \n    .kpi-card:hover {\n        transform: translateY(-4px);\n        box-shadow: 0 8px 16px rgba(0,0,0,0.12);\n    }\n    \n    .kpi-card.meta { border-left-color: #10b981; }\n    .kpi-card.real { border-left-color: #f59e0b; }\n    .kpi-card.acum { border-left-color: #8b5cf6; }\n    \n    .kpi-label {\n        font-size: 0.9em;\n        color: #64748b;\n        font-weight: 700;\n        text-transform: uppercase;\n        letter-spacing: 0.8px;\n        margin-bottom: 8px;\n    }\n    \n    .kpi-value {\n        font-size: 1.8em;\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        letter-spacing: -1px;\n    }\n    \n    .progress-section {\n        margin-top: 24px;\n        background: #f8fafc;\n        padding: 20px;\n        border-radius: 12px;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .progress-label {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 10px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n    }\n    \n    .progress-bar {\n        background: #e2e8f0;\n        border-radius: 12px;\n        height: 16px;\n        overflow: hidden;\n        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);\n    }\n    \n    .progress-fill {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 3s infinite;\n    }\n    \n    .turno-info {\n        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);\n        padding: 16px 20px;\n        border-radius: 12px;\n        margin-bottom: 20px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n        border: 1px solid #e2e8f0;\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n</style>\n\n<div class=\"dashboard-container\">\n    <div class=\"kpi-header\">\n        📊 KPIs EN TIEMPO REAL\n    </div>\n    \n    <div v-if=\"msg.payload\">\n        <div class=\"turno-info\">\n            <strong>Turno {{msg.payload.turno}}</strong> | Hora {{msg.payload.hora}}/8 | Staffing: {{msg.payload.staffing}}\n        </div>\n        \n        <div class=\"kpi-grid\">\n            <div class=\"kpi-card meta\">\n                <div class=\"kpi-label\">Meta por Hora</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_hora}}</div>\n            </div>\n            <div class=\"kpi-card real\">\n                <div class=\"kpi-label\">Producción Actual</div>\n                <div class=\"kpi-value\">{{msg.payload.real_hora}}</div>\n            </div>\n            <div class=\"kpi-card acum\">\n                <div class=\"kpi-label\">Meta Acumulada</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</div>\n            </div>\n            <div class=\"kpi-card\">\n                <div class=\"kpi-label\">Real Acumulado</div>\n                <div class=\"kpi-value\">{{msg.payload.real_turno_acum}}</div>\n            </div>\n        </div>\n        \n        <div class=\"progress-section\">\n            <div class=\"progress-label\">\n                <span>Progreso del Turno</span>\n                <span>{{Math.round((msg.payload.hora/8)*100)}}%</span>\n            </div>\n            <div class=\"progress-bar\">\n                <div class=\"progress-fill\" :style=\"{ width: (msg.payload.hora/8)*100 + '%' }\"></div>\n            </div>\n        </div>\n    </div>\n    <div v-else>\n        <div style=\"text-align: center; color: #64748b; padding: 40px;\">\n            <div style=\"font-size: 3em; margin-bottom: 16px;\">⏳</div>\n            Esperando datos de simulación...\n        </div>\n    </div>\n</div>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1320,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "696c5cc2febe827b",
+        "type": "ui-slider",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Parámetro: Staffing",
+        "label": "Personal (Staffing):",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "topic": "msg.payload",
+        "topicType": "str",
+        "showTicks": "false",
+        "min": "1",
+        "max": "6",
+        "step": "1",
+        "className": "",
+        "iconPrepend": "",
+        "iconAppend": "",
+        "color": "",
+        "colorTrack": "",
+        "colorThumb": "",
+        "showTextField": false,
+        "x": 220,
+        "y": 260,
+        "wires": [
+            [
+                "34effe9760267302"
+            ]
+        ]
+    },
+    {
+        "id": "4dbba5aa2bc0e7d0",
+        "type": "ui-number-input",
+        "z": "ba2c364934eb086e",
+        "group": "dff97118a2e91311",
+        "name": "Parámetro: Meta por Hora",
+        "label": "Meta por Hora (por celda):",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 1,
+        "max": 20,
+        "step": 1,
+        "tooltip": "",
+        "passthru": true,
+        "sendOnBlur": true,
+        "sendOnEnter": true,
+        "className": "",
+        "clearable": false,
+        "icon": "",
+        "iconPosition": "left",
+        "iconInnerPosition": "inside",
+        "spinner": "default",
+        "x": 220,
+        "y": 320,
+        "wires": [
+            [
+                "f2ccc8c8cfb94ae8"
+            ]
+        ]
+    },
+    {
+        "id": "34effe9760267302",
+        "type": "change",
+        "z": "ba2c364934eb086e",
+        "name": "set flow.staffing",
+        "rules": [
+            {
+                "t": "set",
+                "p": "staffing",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 420,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f2ccc8c8cfb94ae8",
+        "type": "change",
+        "z": "ba2c364934eb086e",
+        "name": "set flow.meta_hora",
+        "rules": [
+            {
+                "t": "set",
+                "p": "meta_hora",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 420,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ab753daf901837b7",
+        "type": "function",
+        "z": "ba2c364934eb086e",
+        "name": "Formatear Gráfico (por Turno)",
+        "func": "// msg.payload = { turno: 1, meta: X, real: Y, ... }\nlet p = msg.payload;\nlet category = `T${p.turno}`; // La etiqueta para el eje X, ej: \"T1\"\n\n// Mensaje para la barra \"Real\"\nlet msg_real = {\n    topic: \"Producción Real\",\n    payload: {\n        x: category,\n        y: p.real\n    }\n};\n\n// Mensaje para la barra \"Meta\"\nlet msg_meta = {\n    topic: \"Meta de Turno\",\n    payload: {\n        x: category,\n        y: p.meta\n    }\n};\n\n// Retorna un array de mensajes.\n// El ui-chart los recibirá y los ploteará como dos barras\n// en la misma categoría (ej. \"T1\")\nreturn [msg_real, msg_meta];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 820,
+        "y": 280,
+        "wires": [
+            [
+                "84e3fdf1fb3598f9"
+            ]
+        ]
+    },
+    {
+        "id": "abdb9b63c93adb30",
+        "type": "inject",
+        "z": "ba2c364934eb086e",
+        "name": "Establecer Defaults (Deploy)",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.5,
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 220,
+        "y": 400,
+        "wires": [
+            [
+                "fd9249ed02c959f0",
+                "340c8efbf946e517"
+            ]
+        ]
+    },
+    {
+        "id": "fd9249ed02c959f0",
+        "type": "change",
+        "z": "ba2c364934eb086e",
+        "name": "Default Staffing: 3",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "3",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 440,
+        "y": 380,
+        "wires": [
+            [
+                "696c5cc2febe827b"
+            ]
+        ]
+    },
+    {
+        "id": "340c8efbf946e517",
+        "type": "change",
+        "z": "ba2c364934eb086e",
+        "name": "Default Meta: 5",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "5",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 430,
+        "y": 440,
+        "wires": [
+            [
+                "4dbba5aa2bc0e7d0"
+            ]
+        ]
+    },
+    {
+        "id": "ab95e6f6719ad9d6",
+        "type": "inject",
+        "z": "e74f59003df1920c",
         "name": "Simular 1 Hora (cada 5 seg)",
         "props": [
             {
@@ -267,16 +757,16 @@
         "y": 140,
         "wires": [
             [
-                "e3397559888fa01f"
+                "8b06f4d677adbc92"
             ]
         ]
     },
     {
-        "id": "e3397559888fa01f",
+        "id": "8b06f4d677adbc92",
         "type": "function",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "Motor de Simulación (Gemelo Digital)",
-        "func": "// --- 1. OBTENER ESTADO ANTERIOR (O INICIALIZAR) ---\nconst PROCESOS = ['corte', 'costura', 'inspeccion', 'empaque'];\n\nlet celdas = flow.get(\"celdas\") || [\n    { id: 1, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 2, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 12, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 3, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 8, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 4, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 5, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 15, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 6, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 }\n];\nlet estado_sim = flow.get(\"estado_sim\") || { hora_turno: 0, num_turno: 1, horas_totales: 0 };\n\n// --- 2. OBTENER PARÁMETROS DEL DASHBOARD ---\nlet staffing = flow.get(\"staffing\") || 3;\nlet meta_hora_por_celda = flow.get(\"meta_hora\") || 5;\n\n// --- 3. AVANZAR SIMULACIÓN 1 HORA ---\nestado_sim.hora_turno++;\nestado_sim.horas_totales++;\n\nlet produccion_total_hora = 0;\nlet produccion_total_turno_acumulada = 0;\n\n// --- 4. SIMULACIÓN POR CELDA (Flujo, KPIs) ---\nfor (let i = 0; i < celdas.length; i++) {\n    let celda = celdas[i];\n    celda.unid_ok_hora = 0; // Reseteamos la producción de esta hora\n    \n    // 4.1. Reasignación de Personal\n    if (i < staffing) {\n        \n        // 4.2. Simulación Cuello de Botella\n        if (celda.id === 2 && celdas[0].estado !== 'trabajando') {\n            celda.estado = 'esperando';\n            celda.tiempo_espera += 1;\n            celda.progreso = 0; // Pausa y resetea progreso si espera\n        } \n        // 4.3. Simulación de Falla Aleatoria\n        else if (celda.estado !== 'esperando') {\n            let rand = Math.random();\n            if (celda.estado === 'parada' && rand < 0.2) {\n                celda.estado = 'trabajando'; // 20% chance de repararse\n            }\n\n            if (celda.estado === 'trabajando') {\n                if (rand < 0.15) { // 15% chance de falla\n                    celda.estado = 'parada';\n                    celda.progreso = 0; // Resetea progreso al fallar\n                } else {\n                    // --- LÓGICA DE PROCESO TEXTIL ---\n                    celda.progreso += 25; // Avanza 25% por \"hora\" (tick)\n                    celda.horas_trabajadas += 1;\n                    \n                    if (celda.progreso >= 100) {\n                        celda.progreso = 0;\n                        let idx_actual = PROCESOS.indexOf(celda.proceso);\n                        \n                        if (idx_actual >= PROCESOS.length - 1) { // Si estaba en 'empaque'\n                            // Proceso terminado, 1 unidad producida\n                            celda.proceso = PROCESOS[0]; // Vuelve a 'corte'\n                            celda.unid_ok_hora = 1; \n                            celda.unid_ok_total_turno += 1;\n                        } else {\n                            celda.proceso = PROCESOS[idx_actual + 1]; // Avanza al siguiente proceso\n                        }\n                    }\n                    // --- FIN LÓGICA TEXTIL ---\n                }\n            } else if (celda.estado === 'parada') {\n                // Sigue en parada, no hace nada\n            }\n        }\n    } else {\n        // Celda NO tiene personal\n        celda.estado = 'sin_personal';\n        celda.progreso = 0;\n    }\n    \n    // 4.4. Calcular KPIs de Celda\n    if (estado_sim.hora_turno > 0) {\n        celda.utilizacion = (celda.horas_trabajadas / estado_sim.hora_turno) * 100;\n    } else {\n        celda.utilizacion = 0;\n    }\n    produccion_total_turno_acumulada += celda.unid_ok_total_turno;\n    produccion_total_hora += celda.unid_ok_hora;\n}\n\n// --- 5. PREPARAR SALIDAS (Dashboard) ---\n\n// Salida 1: Datos para el Grid de Celdas (se envía siempre)\nlet msg_grid = { payload: celdas };\n\n// Salida 2: Datos para la Tabla Comparativa (se envía siempre)\nlet meta_hora_total_staffed = meta_hora_por_celda * staffing;\nlet msg_tabla = { \n    payload: {\n        hora: estado_sim.hora_turno,\n        turno: estado_sim.num_turno,\n        staffing: staffing,\n        meta_hora: meta_hora_total_staffed,\n        real_hora: produccion_total_hora,\n        meta_turno_acum: meta_hora_total_staffed * estado_sim.hora_turno,\n        real_turno_acum: produccion_total_turno_acumulada\n    }\n};\n\nlet msg_turno_fin = null;\n\n// --- 6. AGREGACIÓN POR TURNO (Flujo) ---\nif (estado_sim.hora_turno >= 8) { // Asumimos turno de 8 horas\n    let meta_total_turno = meta_hora_total_staffed * 8;\n    let real_total_turno = produccion_total_turno_acumulada;\n    let cumplimiento = 0;\n    if (meta_total_turno > 0) {\n        cumplimiento = (real_total_turno / meta_total_turno) * 100;\n    }\n    \n    // 6.1. Preparar Salida 3: Datos de fin de turno (Gráfico y Alerta)\n    msg_turno_fin = {\n        payload: {\n            turno: estado_sim.num_turno,\n            meta: meta_total_turno,\n            real: real_total_turno,\n            cumplimiento: cumplimiento,\n            alerta_msg: cumplimiento < 90 ? \n                `ALERTA: Desviación en Turno ${estado_sim.num_turno}. Cumplimiento: ${cumplimiento.toFixed(1)}%` : \n                `Turno ${estado_sim.num_turno} OK. Cumplimiento: ${cumplimiento.toFixed(1)}%`,\n            hubo_desviacion: cumplimiento < 90\n        }\n    };\n    \n    // 6.3. Resetear para el siguiente turno\n    estado_sim.hora_turno = 0;\n    estado_sim.num_turno++;\n    for (let celda of celdas) {\n        celda.unid_ok_total_turno = 0;\n        celda.horas_trabajadas = 0;\n        celda.tiempo_espera = 0;\n        celda.utilizacion = 0;\n        celda.progreso = 0;\n        celda.proceso = 'corte';\n    }\n}\n\n// --- 7. GUARDAR ESTADO PARA PRÓXIMO TICK ---\nflow.set(\"celdas\", celdas);\nflow.set(\"estado_sim\", estado_sim);\n\n// Retornar mensajes a las 3 salidas del nodo\nreturn [ msg_grid, msg_tabla, msg_turno_fin ];",
+        "func": "// --- 1. OBTENER ESTADO ANTERIOR (O INICIALIZAR) ---\nconst PROCESOS = ['corte', 'costura', 'inspeccion', 'empaque'];\n\nlet celdas = flow.get(\"celdas\") || [\n    { id: 1, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 2, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 12, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 3, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 8, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 4, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 5, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 15, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 6, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 }\n];\nlet estado_sim = flow.get(\"estado_sim\") || { hora_turno: 0, num_turno: 1, horas_totales: 0 };\n\n// --- 2. OBTENER PARÁMETROS DEL DASHBOARD ---\nlet staffing = flow.get(\"staffing\") || 3;\nlet meta_hora_por_celda = flow.get(\"meta_hora\") || 5;\n\n// --- 3. AVANZAR SIMULACIÓN 1 HORA ---\nestado_sim.hora_turno++;\nestado_sim.horas_totales++;\n\nlet produccion_total_hora = 0;\nlet produccion_total_turno_acumulada = 0;\n\n// --- 4. SIMULACIÓN POR CELDA (Flujo, KPIs) ---\nfor (let i = 0; i < celdas.length; i++) {\n    let celda = celdas[i];\n    celda.unid_ok_hora = 0; // Reseteamos la producción de esta hora\n    \n    // 4.1. Reasignación de Personal\n    if (i < staffing) {\n        \n        // 4.2. Simulación Cuello de Botella\n        if (celda.id === 2 && celdas[0].estado !== 'trabajando') {\n            celda.estado = 'esperando';\n            celda.tiempo_espera += 1;\n            celda.progreso = 0; // Pausa y resetea progreso si espera\n        } \n        // 4.3. Simulación de Falla Aleatoria\n        else if (celda.estado !== 'esperando') {\n            let rand = Math.random();\n            if (celda.estado === 'parada' && rand < 0.2) {\n                celda.estado = 'trabajando'; // 20% chance de repararse\n            }\n\n            if (celda.estado === 'trabajando') {\n                if (rand < 0.15) { // 15% chance de falla\n                    celda.estado = 'parada';\n                    celda.progreso = 0; // Resetea progreso al fallar\n                } else {\n                    // --- LÓGICA DE PROCESO TEXTIL ---\n                    celda.progreso += 25; // Avanza 25% por \"hora\" (tick)\n                    celda.horas_trabajadas += 1;\n                    \n                    if (celda.progreso >= 100) {\n                        celda.progreso = 0;\n                        let idx_actual = PROCESOS.indexOf(celda.proceso);\n                        \n                        if (idx_actual >= PROCESOS.length - 1) { // Si estaba en 'empaque'\n                            // Proceso terminado, 1 unidad producida\n                            celda.proceso = PROCESOS[0]; // Vuelve a 'corte'\n                            celda.unid_ok_hora = 1; \n                            celda.unid_ok_total_turno += 1;\n                        } else {\n                            celda.proceso = PROCESOS[idx_actual + 1]; // Avanza al siguiente proceso\n                        }\n                    }\n                    // --- FIN LÓGICA TEXTIL ---\n                }\n            } else if (celda.estado === 'parada') {\n                // Sigue en parada, no hace nada\n            }\n        }\n    } else {\n        // Celda NO tiene personal\n        celda.estado = 'sin_personal';\n        celda.progreso = 0;\n    }\n    \n    // 4.4. Calcular KPIs de Celda\n    if (estado_sim.hora_turno > 0) {\n        celda.utilizacion = (celda.horas_trabajadas / estado_sim.hora_turno) * 100;\n    } else {\n        celda.utilizacion = 0;\n    }\n    produccion_total_turno_acumulada += celda.unid_ok_total_turno;\n    produccion_total_hora += celda.unid_ok_hora;\n}\n\n// --- 5. PREPARAR SALIDAS (Dashboard) ---\n\n// Salida 1: Datos para el Grid de Celdas (se envía siempre)\nlet msg_grid = { payload: celdas };\n\n// Salida 2: Datos para la Tabla Comparativa (se envía siempre)\nlet meta_hora_total_staffed = meta_hora_por_celda * staffing;\nlet msg_tabla = { \n    payload: {\n        hora: estado_sim.hora_turno,\n        turno: estado_sim.num_turno,\n        staffing: staffing,\n        meta_hora: meta_hora_total_staffed,\n        real_hora: produccion_total_hora,\n        meta_turno_acum: meta_hora_total_staffed * estado_sim.hora_turno,\n        real_turno_acum: produccion_total_turno_acumulada\n    }\n};\n\nlet msg_turno_fin = null;\n\n// --- 6. AGREGACIÓN POR TURNO (Flujo) ---\nif (estado_sim.hora_turno >= 8) { // Asumimos turno de 8 horas\n    let meta_total_turno = meta_hora_total_staffed * 8;\n    let real_total_turno = produccion_total_turno_acumulada;\n    let cumplimiento = 0;\n    if (meta_total_turno > 0) {\n        cumplimiento = (real_total_turno / meta_total_turno) * 100;\n    }\n    \n    // 6.1. Preparar Salida 3: Datos de fin de turno (Gráfico y Alerta)\n    msg_turno_fin = {\n        payload: {\n            turno: estado_sim.num_turno,\n            meta: meta_total_turno,\n            real: real_total_turno,\n            cumplimiento: cumplimiento,\n            alerta_msg: cumplimiento < 90 ? \n                `ALERTA: Desviación en Turno ${estado_sim.num_turno}. Cumplimiento: ${cumplimiento.toFixed(1)}%` : \n                `Turno ${estado_sim.num_turno} OK. Cumplimiento: ${cumplimiento.toFixed(1)}%`,\n            hubo_desviacion: cumplimiento < 90\n        }\n    };\n    \n    // 6.3. Resetear para el siguiente turno\n    estado_sim.hora_turno = 0;\n    estado_sim.num_turno++;\n    for (let celda of celdas) {\n        celda.unid_ok_total_turno = 0;\n        celda.horas_trabajadas = 0;\n        celda.tiempo_espera = 0;\n        celda.utilizacion = 0;\n        celda.progreso = 0;\n        celda.proceso = 'corte';\n    }\n}\n\n// --- 7. GUARDAR ESTADO PARA PRÓXIMO TICK ---\nflow.set(\"celdas\", celdas);\nflow.set(\"estado_sim\", estado_sim);\n// Al final del nodo \"Motor de Simulación\", antes del return\nlet msg_staffing_config = { numCeldas: celdas.length };\n\n// Cambiar el return para incluir una 4ta salida\nreturn [ msg_grid, msg_tabla, msg_turno_fin, msg_staffing_config ];\n// Retornar mensajes a las 3 salidas del nodo\nreturn [ msg_grid, msg_tabla, msg_turno_fin ];",
         "outputs": 3,
         "timeout": 0,
         "noerr": 0,
@@ -287,21 +777,21 @@
         "y": 140,
         "wires": [
             [
-                "c21c066dd89a23d6"
+                "0516d063aabfaa9c"
             ],
             [
-                "1688bd6d7b164f15"
+                "168a98896d79bb5f"
             ],
             [
-                "d6ba2efd6674554c",
-                "bf88e63611cfd391"
+                "afa465dd1bb817d5",
+                "9699067b273cc736"
             ]
         ]
     },
     {
-        "id": "c21c066dd89a23d6",
+        "id": "0516d063aabfaa9c",
         "type": "ui-template",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "group": "6e18838a8ce84c0b",
         "page": "",
         "ui": "",
@@ -309,7 +799,7 @@
         "order": 1,
         "width": 0,
         "height": 0,
-        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Un poco más ancho */\n        gap: 10px;\n        padding: 10px;\n    }\n    .celda {\n        border: 1px solid #444;\n        border-radius: 5px;\n        padding: 10px;\n        text-align: center;\n        color: #333;\n        transition: background-color 0.3s ease;\n        height: 180px; /* Un poco más alto para los KPIs */\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n    }\n    .celda-title {\n        font-weight: bold;\n        font-size: 1.1em;\n        border-bottom: 1px solid rgba(0,0,0,0.2);\n        margin-bottom: 5px;\n        padding-bottom: 5px;\n    }\n    /* Contenedor KPIs inferiores */\n    .celda-kpis-bottom {\n        font-size: 0.8em; /* Más pequeño */\n        text-align: left;\n        margin-top: 8px;\n        line-height: 1.3;\n        color: rgba(0,0,0,0.7); /* Color texto KPIs */\n    }\n    .celda-kpis-bottom b {\n         color: rgba(0,0,0,0.9); /* Color etiquetas KPIs */\n    }\n\n    /* Icono grande para el proceso o estado */\n    .proceso-icon {\n        font-size: 2.5em; /* Icono grande */\n        line-height: 1.2;\n        flex-grow: 1; /* Ocupa espacio disponible */\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        min-height: 40px; /* Altura mínima para el icono */\n    }\n\n    /* Barra de progreso del PROCESO */\n    .proceso-progreso-container {\n        background-color: rgba(0,0,0,0.3);\n        border-radius: 4px;\n        height: 10px;\n        width: 100%;\n        margin-top: 5px;\n        border: 1px solid rgba(0,0,0,0.2);\n        overflow: hidden;\n    }\n    .proceso-progreso-value {\n        background-color: #FFF;\n        opacity: 0.8;\n        height: 100%;\n        transition: width 0.3s ease;\n    }\n    .progreso-text {\n        font-size: 0.8em;\n        font-weight: bold;\n        color: rgba(255,255,255,0.9);\n        margin-top: 2px;\n    }\n    .estado-text { /* Para mostrar texto de estado (PARADA, ESPERANDO...) */\n         font-weight: bold;\n         margin-top: 10px;\n         font-size: 0.9em;\n    }\n\n\n    /* Clases de estado (Fondo) */\n    .celda-estado-trabajando { background-color: #2a9d8f; color: white; }\n    .celda-estado-parada { background-color: #e76f51; color: white; }\n    .celda-estado-esperando { background-color: #e9c46a; color: black; }\n    .celda-estado-sin_personal { background-color: #607D8B; color: white; }\n\n    /* Ajuste color KPIs en fondos oscuros */\n    .celda-estado-trabajando .celda-kpis-bottom,\n    .celda-estado-parada .celda-kpis-bottom,\n    .celda-estado-sin_personal .celda-kpis-bottom {\n        color: rgba(255,255,255,0.7);\n    }\n     .celda-estado-trabajando .celda-kpis-bottom b,\n    .celda-estado-parada .celda-kpis-bottom b,\n    .celda-estado-sin_personal .celda-kpis-bottom b {\n        color: rgba(255,255,255,0.9);\n    }\n\n</style>\n\n<div class=\"grid-container\">\n\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n\n        <div style=\"flex-grow: 1; display: flex; flex-direction: column; justify-content: center;\">\n            <div v-if=\"celda.estado === 'trabajando'\">\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.proceso === 'corte'\">✂️</span>\n                    <span v-else-if=\"celda.proceso === 'costura'\">🧵</span>\n                    <span v-else-if=\"celda.proceso === 'inspeccion'\">🔍</span>\n                    <span v-else-if=\"celda.proceso === 'empaque'\">📦</span>\n                </div>\n                <div class=\"progreso-text\">{{celda.proceso.toUpperCase()}}</div>\n                <div class=\"proceso-progreso-container\">\n                    <div class=\"proceso-progreso-value\" :style=\"{ width: celda.progreso + '%' }\"></div>\n                </div>\n            </div>\n            <div v-else>\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.estado === 'parada'\">⚠️</span>\n                    <span v-else-if=\"celda.estado === 'esperando'\">⏳</span>\n                    <span v-else-if=\"celda.estado === 'sin_personal'\">🚫</span>\n                </div>\n                 <div class=\"estado-text\">{{celda.estado.toUpperCase()}}</div>\n            </div>\n        </div>\n\n        <div class=\"celda-kpis-bottom\">\n           <div><b>Prod. Turno:</b> {{celda.unid_ok_total_turno}}</div>\n           <div><b>Util (%):</b> {{celda.utilizacion.toFixed(1)}}%</div>\n           <div><b>Espera (h):</b> {{celda.tiempo_espera}}</div>\n        </div>\n\n    </div>\n</div>",
+        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Un poco más ancho */\n        gap: 10px;\n        padding: 10px;\n    }\n    .celda {\n        border: 1px solid #444;\n        border-radius: 5px;\n        padding: 10px;\n        text-align: center;\n        color: #333;\n        transition: background-color 0.3s ease;\n        height: 180px; /* Un poco más alto para los KPIs */\n        display: flex;\n        flex-direction: column;\n        justify-content: space-between;\n    }\n    .celda-title {\n        font-weight: bold;\n        font-size: 1.1em;\n        border-bottom: 1px solid rgba(0,0,0,0.2);\n        margin-bottom: 5px;\n        padding-bottom: 5px;\n    }\n    /* Contenedor KPIs inferiores */\n    .celda-kpis-bottom {\n        font-size: 0.8em; /* Más pequeño */\n        text-align: left;\n        margin-top: 8px;\n        line-height: 1.3;\n        color: rgba(0,0,0,0.7); /* Color texto KPIs */\n    }\n    .celda-kpis-bottom b {\n         color: rgba(0,0,0,0.9); /* Color etiquetas KPIs */\n    }\n\n    /* Icono grande para el proceso o estado */\n    .proceso-icon {\n        font-size: 2.5em; /* Icono grande */\n        line-height: 1.2;\n        flex-grow: 1; /* Ocupa espacio disponible */\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        min-height: 40px; /* Altura mínima para el icono */\n    }\n\n    /* Barra de progreso del PROCESO */\n    .proceso-progreso-container {\n        background-color: rgba(0,0,0,0.3);\n        border-radius: 4px;\n        height: 10px;\n        width: 100%;\n        margin-top: 5px;\n        border: 1px solid rgba(0,0,0,0.2);\n        overflow: hidden;\n    }\n    .proceso-progreso-value {\n        background-color: #FFF;\n        opacity: 0.8;\n        height: 100%;\n        transition: width 0.3s ease;\n    }\n    .progreso-text {\n        font-size: 0.8em;\n        font-weight: bold;\n        color: rgba(255,255,255,0.9);\n        margin-top: 2px;\n    }\n    .estado-text { /* Para mostrar texto de estado (PARADA, ESPERANDO...) */\n         font-weight: bold;\n         margin-top: 10px;\n         font-size: 0.9em;\n    }\n\n\n    /* Clases de estado (Fondo) */\n    .celda-estado-trabajando { background-color: #2a9d8f; color: white; }\n    .celda-estado-parada { background-color: #e76f51; color: white; }\n    .celda-estado-esperando { background-color: #e9c46a; color: black; }\n    .celda-estado-sin_personal { background-color: #607D8B; color: white; }\n\n    /* Ajuste color KPIs en fondos oscuros */\n    .celda-estado-trabajando .celda-kpis-bottom,\n    .celda-estado-parada .celda-kpis-bottom,\n    .celda-estado-sin_personal .celda-kpis-bottom {\n        color: rgba(255,255,255,0.7);\n    }\n     .celda-estado-trabajando .celda-kpis-bottom b,\n    .celda-estado-parada .celda-kpis-bottom b,\n    .celda-estado-sin_personal .celda-kpis-bottom b {\n        color: rgba(255,255,255,0.9);\n    }\n\n</style>\n\n<div class=\"grid-container\">\n\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n\n        <div style=\"flex-grow: 1; display: flex; flex-direction: column; justify-content: center;\">\n            <div v-if=\"celda.estado === 'trabajando'\">\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.proceso === 'corte'\">✂️</span>\n                    <span v-else-if=\"celda.proceso === 'costura'\">🧵</span>\n                    <span v-else-if=\"celda.proceso === 'inspeccion'\">🔍</span>\n                    <span v-else-if=\"celda.proceso === 'empaque'\">📦</span>\n                </div>\n                <div class=\"progreso-text\">{{celda.proceso.toUpperCase()}}</div>\n                <div class=\"proceso-progreso-container\">\n                    <div class=\"proceso-progreso-value\" :style=\"{ width: celda.progreso + '%' }\"></div>\n                </div>\n            </div>\n            <div v-else>\n                <div class=\"proceso-icon\">\n                    <span v-if=\"celda.estado === 'parada'\">⚠️</span>\n                    <span v-else-if=\"celda.estado === 'esperando'\">⏳</span>\n                    <span v-else-if=\"celda.estado === 'sin_personal'\">🚫</span>\n                </div>\n                 <div class=\"estado-text\">{{celda.estado.toUpperCase()}}</div>\n            </div>\n        </div>\n\n        <div class=\"celda-kpis-bottom\">\n            <div><b>Prod. Turno:</b> {{celda.unid_ok_total_turno}}</div>\n            <div><b>Util (%):</b> {{celda.utilizacion.toFixed(1)}}%</div>\n            <div><b>Espera (h):</b> {{celda.tiempo_espera}}</div>\n        </div>\n\n    </div>\n</div>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
@@ -322,32 +812,32 @@
         ]
     },
     {
-        "id": "1688bd6d7b164f15",
+        "id": "168a98896d79bb5f",
         "type": "ui-template",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "group": "14dca520c1815b77",
         "page": "",
         "ui": "",
-        "name": "Tabla comparativa metas vs real",
+        "name": "KPIs en Tiempo Real (Nuevo Diseño)",
         "order": 1,
         "width": 0,
         "height": 0,
-        "format": "<style>\n    .kpi-table {\n        width: 100%;\n        border-collapse: collapse;\n    }\n    .kpi-table td {\n        padding: 8px 10px;\n        border-bottom: 1px solid #444;\n        font-size: 1.0em;\n    }\n    .kpi-label {\n        font-weight: bold;\n        color: #505050;\n        width: 60%;\n    }\n    .kpi-value {\n        text-align: right;\n        font-family: monospace;\n        font-size: 1.1em;\n        font-weight: bold;\n    }\n</style>\n\n<div v-if=\"msg.payload\">\n    <h4 style=\"margin-top:0; margin-bottom: 10px;\">Turno {{msg.payload.turno}} (Hora {{msg.payload.hora}}/8)</h4>\n    <table class=\"kpi-table\">\n        <tr>\n            <td class=\"kpi-label\">Personal (Staffing)</td>\n            <td class=\"kpi-value\">{{msg.payload.staffing}}</td>\n        </tr>\n        <tr>\n            <td class=\"kpi-label\">Meta por Hora (Total)</td>\n            <td class=\"kpi-value\">{{msg.payload.meta_hora}}</td>\n        </tr>\n        <tr>\n            <td class=\"kpi-label\">Producción Hora Actual</td>\n            <td class=\"kpi-value\">{{msg.payload.real_hora}}</td>\n        </tr>\n        <tr>\n            <td class=\"kpi-label\">Meta Acum. Turno</td>\n            <td class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</td>\n        </tr>\n        <tr>\n            <td class=\"kpi-label\">Real Acum. Turno</td>\n            <td class=\"kpi-value\">{{msg.payload.real_turno_acum}}</td>\n        </tr>\n    </table>\n</div>",
+        "format": "<style>\n    .dashboard-container {\n        background: white;\n        border-radius: 16px;\n        padding: 24px;\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        font-family: 'Segoe UI', system-ui, sans-serif;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .kpi-header {\n        font-size: 1.3em;\n        font-weight: 800;\n        color: #1e293b;\n        margin-bottom: 24px;\n        padding-bottom: 16px;\n        border-bottom: 3px solid #f1f5f9;\n        display: flex;\n        align-items: center;\n        gap: 12px;\n        letter-spacing: -0.5px;\n    }\n    \n    .kpi-grid {\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n        gap: 20px;\n        margin-bottom: 24px;\n    }\n    \n    .kpi-card {\n        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);\n        padding: 20px;\n        border-radius: 12px;\n        border-left: 5px solid #3b82f6;\n        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        border: 1px solid #f1f5f9;\n    }\n    \n    .kpi-card:hover {\n        transform: translateY(-4px);\n        box-shadow: 0 8px 16px rgba(0,0,0,0.12);\n    }\n    \n    .kpi-card.meta { border-left-color: #10b981; }\n    .kpi-card.real { border-left-color: #f59e0b; }\n    .kpi-card.acum { border-left-color: #8b5cf6; }\n    \n    .kpi-label {\n        font-size: 0.9em;\n        color: #64748b;\n        font-weight: 700;\n        text-transform: uppercase;\n        letter-spacing: 0.8px;\n        margin-bottom: 8px;\n    }\n    \n    .kpi-value {\n        font-size: 1.8em;\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        letter-spacing: -1px;\n    }\n    \n    .progress-section {\n        margin-top: 24px;\n        background: #f8fafc;\n        padding: 20px;\n        border-radius: 12px;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .progress-label {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 10px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n    }\n    \n    .progress-bar {\n        background: #e2e8f0;\n        border-radius: 12px;\n        height: 16px;\n        overflow: hidden;\n        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);\n    }\n    \n    .progress-fill {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 3s infinite;\n    }\n    \n    .turno-info {\n        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);\n        padding: 16px 20px;\n        border-radius: 12px;\n        margin-bottom: 20px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n        border: 1px solid #e2e8f0;\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n</style>\n\n<div class=\"dashboard-container\">\n    <div class=\"kpi-header\">\n        📊 KPIs EN TIEMPO REAL\n    </div>\n    \n    <div v-if=\"msg.payload\">\n        <div class=\"turno-info\">\n            <strong>Turno {{msg.payload.turno}}</strong> | Hora {{msg.payload.hora}}/8 | <b>Staffing: {{msg.payload.staffing}}</b>\n        </div>\n        \n        <div class=\"kpi-grid\">\n            <div class=\"kpi-card meta\">\n                <div class=\"kpi-label\">Meta por Hora</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_hora}}</div>\n            </div>\n            <div class=\"kpi-card real\">\n                <div class=\"kpi-label\">Producción Actual</div>\n                <div class=\"kpi-value\">{{msg.payload.real_hora}}</div>\n            </div>\n            <div class=\"kpi-card acum\">\n                <div class=\"kpi-label\">Meta Acumulada</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</div>\n            </div>\n            <div class=\"kpi-card\">\n                <div class=\"kpi-label\">Real Acumulado</div>\n                <div class=\"kpi-value\">{{msg.payload.real_turno_acum}}</div>\n            </div>\n        </div>\n        \n        <div class=\"progress-section\">\n            <div class=\"progress-label\">\n                <span>Progreso del Turno</span>\n                <span>{{Math.round((msg.payload.hora/8)*100)}}%</span>\n            </div>\n            <div class=\"progress-bar\">\n                <div class=\"progress-fill\" :style=\"{ width: (msg.payload.hora/8)*100 + '%' }\"></div>\n            </div>\n        </div>\n    </div>\n    <div v-else>\n        <div style=\"text-align: center; color: #64748b; padding: 40px;\">\n            <div style=\"font-size: 3em; margin-bottom: 16px;\">⏳</div>\n            Esperando datos de simulación...\n        </div>\n    </div>\n</div>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 810,
+        "x": 830,
         "y": 140,
         "wires": [
             []
         ]
     },
     {
-        "id": "d074bb6c0cb27bd0",
+        "id": "de73a502ce3adbf6",
         "type": "ui-chart",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "group": "b1e725e9fb17355d",
         "name": "Gráfico",
         "label": "Producción vs Meta por Turno",
@@ -405,9 +895,9 @@
         ]
     },
     {
-        "id": "d6ba2efd6674554c",
+        "id": "afa465dd1bb817d5",
         "type": "switch",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "¿Hubo Desviación? (<90%)",
         "property": "payload.hubo_desviacion",
         "propertyType": "msg",
@@ -420,17 +910,17 @@
         "repair": false,
         "outputs": 1,
         "x": 780,
-        "y": 200,
+        "y": 240,
         "wires": [
             [
-                "f169bf815743e5a8"
+                "3fa370b18e34e047"
             ]
         ]
     },
     {
-        "id": "f169bf815743e5a8",
+        "id": "3fa370b18e34e047",
         "type": "change",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "Preparar Msg de Alerta",
         "rules": [
             {
@@ -457,14 +947,14 @@
         "y": 200,
         "wires": [
             [
-                "c3b04717ec532442"
+                "91352b2b22897b3d"
             ]
         ]
     },
     {
-        "id": "c3b04717ec532442",
+        "id": "91352b2b22897b3d",
         "type": "ui-notification",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "ui": "9477a706cabb673d",
         "position": "top right",
         "colorDefault": false,
@@ -484,45 +974,13 @@
         "wires": []
     },
     {
-        "id": "896474181e7bdb2e",
-        "type": "ui-slider",
-        "z": "1f8fab03ad5a4d3c",
-        "group": "082d639628900acd",
-        "name": "Parámetro: Staffing",
-        "label": "Personal (Staffing):",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "passthru": false,
-        "topic": "msg.payload",
-        "topicType": "str",
-        "showTicks": "always",
-        "min": "1",
-        "max": "6",
-        "step": "1",
-        "className": "",
-        "iconPrepend": "",
-        "iconAppend": "",
-        "color": "",
-        "colorTrack": "",
-        "colorThumb": "",
-        "showTextField": false,
-        "x": 200,
-        "y": 280,
-        "wires": [
-            [
-                "0999672e1fdad722"
-            ]
-        ]
-    },
-    {
-        "id": "40078b319c5cef5b",
+        "id": "a880debeebc9ac7b",
         "type": "ui-number-input",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "group": "082d639628900acd",
         "name": "Parámetro: Meta por Hora",
         "label": "Meta por Hora (por celda):",
-        "order": 2,
+        "order": 1,
         "width": 0,
         "height": 0,
         "topic": "topic",
@@ -540,18 +998,18 @@
         "iconPosition": "left",
         "iconInnerPosition": "inside",
         "spinner": "default",
-        "x": 200,
-        "y": 340,
+        "x": 690,
+        "y": 460,
         "wires": [
             [
-                "047e776dd125f827"
+                "e10d90ad22462a68"
             ]
         ]
     },
     {
-        "id": "0999672e1fdad722",
+        "id": "3daa990ceced0393",
         "type": "change",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "set flow.staffing",
         "rules": [
             {
@@ -567,16 +1025,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 400,
-        "y": 280,
+        "x": 1000,
+        "y": 400,
         "wires": [
             []
         ]
     },
     {
-        "id": "047e776dd125f827",
+        "id": "e10d90ad22462a68",
         "type": "change",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "set flow.meta_hora",
         "rules": [
             {
@@ -592,16 +1050,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 400,
-        "y": 340,
+        "x": 970,
+        "y": 460,
         "wires": [
             []
         ]
     },
     {
-        "id": "bf88e63611cfd391",
+        "id": "9699067b273cc736",
         "type": "function",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "Formatear Gráfico (por Turno)",
         "func": "// msg.payload = { turno: 1, meta: X, real: Y, ... }\nlet p = msg.payload;\nlet category = `T${p.turno}`; // La etiqueta para el eje X, ej: \"T1\"\n\n// Mensaje para la barra \"Real\"\nlet msg_real = {\n    topic: \"Producción Real\",\n    payload: {\n        x: category,\n        y: p.real\n    }\n};\n\n// Mensaje para la barra \"Meta\"\nlet msg_meta = {\n    topic: \"Meta de Turno\",\n    payload: {\n        x: category,\n        y: p.meta\n    }\n};\n\n// Retorna un array de mensajes.\n// El ui-chart los recibirá y los ploteará como dos barras\n// en la misma categoría (ej. \"T1\")\nreturn [msg_real, msg_meta];",
         "outputs": 1,
@@ -614,14 +1072,14 @@
         "y": 300,
         "wires": [
             [
-                "d074bb6c0cb27bd0"
+                "de73a502ce3adbf6"
             ]
         ]
     },
     {
-        "id": "b13d2fac3d4b243a",
+        "id": "4844b9997ec08fff",
         "type": "inject",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "Establecer Defaults (Deploy)",
         "props": [
             {
@@ -635,26 +1093,26 @@
         "topic": "",
         "payload": "true",
         "payloadType": "bool",
-        "x": 200,
+        "x": 120,
         "y": 420,
         "wires": [
             [
-                "0bd9e76233b415a5",
-                "934e228809c10f28"
+                "2de0b2ae3ea16131",
+                "dcc8d5c46f48db66"
             ]
         ]
     },
     {
-        "id": "0bd9e76233b415a5",
+        "id": "2de0b2ae3ea16131",
         "type": "change",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "Default Staffing: 3",
         "rules": [
             {
                 "t": "set",
                 "p": "payload",
                 "pt": "msg",
-                "to": "3",
+                "to": "1",
                 "tot": "num"
             }
         ],
@@ -667,14 +1125,14 @@
         "y": 400,
         "wires": [
             [
-                "896474181e7bdb2e"
+                "b2c3d4e5f6a7b8a9"
             ]
         ]
     },
     {
-        "id": "934e228809c10f28",
+        "id": "dcc8d5c46f48db66",
         "type": "change",
-        "z": "1f8fab03ad5a4d3c",
+        "z": "e74f59003df1920c",
         "name": "Default Meta: 5",
         "rules": [
             {
@@ -694,427 +1152,32 @@
         "y": 460,
         "wires": [
             [
-                "40078b319c5cef5b"
+                "a880debeebc9ac7b"
             ]
         ]
     },
     {
-        "id": "82012bbf1c44582a",
-        "type": "inject",
-        "z": "ba2c364934eb086e",
-        "name": "Simular 1 Hora (cada 5 seg)",
-        "props": [
-            {
-                "p": "payload"
-            }
-        ],
-        "repeat": "5",
-        "crontab": "",
-        "once": true,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "tick",
-        "payloadType": "str",
-        "x": 200,
-        "y": 160,
-        "wires": [
-            [
-                "e1c690f8c7e4b85e"
-            ]
-        ]
-    },
-    {
-        "id": "nuevo_staffing_input",
-        "type": "ui-number-input",
-        "z": "ba2c364934eb086e",
-        "group": "dff97118a2e91311",
-        "name": "Parámetro: Staffing",
-        "label": "👥 Personal (Staffing):",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "topic": "topic",
-        "topicType": "msg",
-        "min": 1,
-        "max": 10,
-        "step": 1,
-        "tooltip": "Número de trabajadores asignados",
-        "passthru": true,
-        "sendOnBlur": true,
-        "sendOnEnter": true,
-        "className": "input-modern",
-        "clearable": false,
-        "icon": "",
-        "iconPosition": "left",
-        "iconInnerPosition": "inside",
-        "spinner": "default",
-        "x": 200,
-        "y": 300,
-        "wires": [
-            [
-                "7b621d826eac247d"
-            ]
-        ]
-    },
-    {
-        "id": "1650d35ca50437b4",
-        "type": "ui-number-input",
-        "z": "ba2c364934eb086e",
-        "group": "dff97118a2e91311",
-        "name": "Parámetro: Meta por Hora",
-        "label": "🎯 Meta por Hora (por celda):",
-        "order": 2,
-        "width": 0,
-        "height": 0,
-        "topic": "topic",
-        "topicType": "msg",
-        "min": 1,
-        "max": 20,
-        "step": 1,
-        "tooltip": "Establece la meta de producción por hora para cada celda",
-        "passthru": true,
-        "sendOnBlur": true,
-        "sendOnEnter": true,
-        "className": "input-modern",
-        "clearable": false,
-        "icon": "",
-        "iconPosition": "left",
-        "iconInnerPosition": "inside",
-        "spinner": "default",
-        "x": 200,
-        "y": 360,
-        "wires": [
-            [
-                "14f5248e9d96fc36"
-            ]
-        ]
-    },
-    {
-        "id": "agregar_celda_btn",
-        "type": "ui-button",
-        "z": "ba2c364934eb086e",
-        "group": "dff97118a2e91311",
-        "name": "Agregar Celda",
-        "label": "➕ Agregar Celda",
-        "order": 3,
-        "width": 0,
-        "height": 0,
-        "tooltip": "Agregar una nueva celda de trabajo",
-        "color": "btn-success",
-        "className": "btn-modern",
-        "icon": "fa-plus",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "agregar_celda",
-        "topicType": "msg",
-        "x": 200,
-        "y": 420,
-        "wires": [
-            [
-                "manejar_agregar_celda"
-            ]
-        ]
-    },
-    {
-        "id": "82f9eb155cb56341",
-        "type": "ui-notification",
-        "z": "ba2c364934eb086e",
-        "ui": "9477a706cabb673d",
-        "position": "top right",
-        "colorDefault": false,
-        "color": "#ef4444",
-        "displayTime": "8",
-        "showCountdown": true,
-        "outputs": 0,
-        "allowDismiss": true,
-        "dismissText": "Cerrar",
-        "allowConfirm": false,
-        "confirmText": "Confirm",
-        "raw": true,
-        "className": "modern-notification",
-        "name": "Alerta de Desviación",
-        "x": 1300,
-        "y": 220,
-        "wires": []
-    },
-    {
-        "id": "bccbedf51a20ae0c",
+        "id": "b2c3d4e5f6a7b8a9",
         "type": "ui-template",
-        "z": "ba2c364934eb086e",
-        "group": "2ae92a9af38a7961",
+        "z": "e74f59003df1920c",
+        "group": "082d639628900acd",
         "page": "",
         "ui": "",
-        "name": "Grid de Celdas (Proceso Textil)",
-        "order": 1,
-        "width": 0,
-        "height": 0,
-        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));\n        gap: 20px;\n        padding: 20px;\n        background: #f8fafc;\n        border-radius: 16px;\n        min-height: 400px;\n    }\n    \n    .celda {\n        border: 2px solid #e2e8f0;\n        border-radius: 16px;\n        padding: 20px;\n        text-align: center;\n        color: #2d3748;\n        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);\n        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        position: relative;\n        overflow: hidden;\n        cursor: pointer;\n    }\n    \n    .celda:hover {\n        transform: translateY(-8px);\n        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);\n    }\n    \n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 6px;\n        transition: all 0.4s ease;\n    }\n    \n    .celda-title {\n        font-weight: 800;\n        font-size: 1.2em;\n        margin-bottom: 16px;\n        padding-bottom: 12px;\n        border-bottom: 2px solid #f1f5f9;\n        color: #1e293b;\n        letter-spacing: -0.5px;\n    }\n    \n    .celda-kpi {\n        font-size: 0.9em;\n        text-align: left;\n        margin-top: 8px;\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n        padding: 4px 0;\n    }\n    \n    .celda-kpi b {\n        color: #64748b;\n        font-weight: 600;\n    }\n    \n    /* Estados con animaciones */\n    .celda-estado-trabajando::before { \n        background: linear-gradient(135deg, #10b981, #059669);\n        animation: pulse-green 2s infinite;\n    }\n    .celda-estado-trabajando { \n        border-top: 6px solid #10b981;\n        animation: glow-green 3s ease-in-out infinite alternate;\n    }\n    \n    .celda-estado-parada::before { \n        background: linear-gradient(135deg, #ef4444, #dc2626);\n        animation: pulse-red 2s infinite;\n    }\n    .celda-estado-parada { \n        border-top: 6px solid #ef4444;\n    }\n    \n    .celda-estado-esperando::before { \n        background: linear-gradient(135deg, #f59e0b, #d97706);\n        animation: pulse-orange 2s infinite;\n    }\n    .celda-estado-esperando { \n        border-top: 6px solid #f59e0b;\n    }\n    \n    .celda-estado-sin_personal::before { \n        background: linear-gradient(135deg, #6b7280, #4b5563);\n    }\n    .celda-estado-sin_personal { \n        border-top: 6px solid #6b7280;\n    }\n\n    /* Barra de utilización mejorada */\n    .util-bar-container {\n        background-color: #e2e8f0;\n        border-radius: 12px;\n        height: 20px;\n        width: 100%;\n        margin-top: 12px;\n        border: 1px solid #cbd5e1;\n        overflow: hidden;\n        position: relative;\n    }\n    \n    .util-bar-value {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 2s infinite;\n    }\n    \n    /* Imágenes de estado mejoradas */\n    .estado-imagen {\n        width: 64px;\n        height: 64px;\n        margin: 0 auto 15px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        filter: brightness(0.9);\n        transition: transform 0.3s ease;\n    }\n    \n    .celda:hover .estado-imagen {\n        transform: scale(1.1);\n    }\n    \n    .imagen-trabajando { background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064039.png'); }\n    .imagen-parada { background-image: url('https://cdn-icons-png.flaticon.com/512/458/458594.png'); }\n    .imagen-esperando { background-image: url('https://cdn-icons-png.flaticon.com/512/3305/3305803.png'); }\n    .imagen-sin_personal { background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828843.png'); }\n    \n    .estado-texto {\n        font-size: 0.8em;\n        font-weight: 800;\n        margin-bottom: 12px;\n        padding: 6px 12px;\n        border-radius: 8px;\n        text-transform: uppercase;\n        letter-spacing: 1px;\n        transition: all 0.3s ease;\n    }\n    \n    .estado-trabajando { background: #d1fae5; color: #065f46; }\n    .estado-parada { background: #fee2e2; color: #991b1b; }\n    .estado-esperando { background: #fef3c7; color: #92400e; }\n    .estado-sin_personal { background: #f1f5f9; color: #374151; }\n    \n    .valor-destacado {\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        font-size: 1.1em;\n    }\n    \n    /* Animaciones */\n    @keyframes pulse-green {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.7; }\n    }\n    \n    @keyframes pulse-red {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.6; }\n    }\n    \n    @keyframes pulse-orange {\n        0%, 100% { opacity: 1; }\n        50% { opacity: 0.7; }\n    }\n    \n    @keyframes glow-green {\n        0% { box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1), 0 2px 4px -1px rgba(16, 185, 129, 0.06); }\n        100% { box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 0 2px 4px -1px rgba(16, 185, 129, 0.2); }\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n    \n    /* Controles de celdas */\n    .celda-controls {\n        margin-top: 15px;\n        padding-top: 15px;\n        border-top: 1px solid #f1f5f9;\n    }\n    \n    .btn-eliminar {\n        background: linear-gradient(135deg, #ef4444, #dc2626);\n        color: white;\n        border: none;\n        padding: 6px 12px;\n        border-radius: 8px;\n        font-size: 0.8em;\n        font-weight: 600;\n        cursor: pointer;\n        transition: all 0.3s ease;\n    }\n    \n    .btn-eliminar:hover {\n        transform: scale(1.05);\n        box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);\n    }\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n        \n        <!-- Imagen representativa del estado -->\n        <div class=\"estado-imagen\" :class=\"'imagen-' + celda.estado\"></div>\n        <div class=\"estado-texto\" :class=\"'estado-' + celda.estado\">{{celda.estado.toUpperCase()}}</div>\n        \n        <div class=\"celda-kpi\">\n            <b>Prod/h:</b>\n            <span class=\"valor-destacado\">{{celda.unid_ok_hora}}</span>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Util:</b>\n            <span class=\"valor-destacado\">{{celda.utilizacion.toFixed(1)}}%</span>\n        </div>\n        <div class=\"util-bar-container\">\n            <div class=\"util-bar-value\" :style=\"{ width: Math.min(celda.utilizacion, 100).toFixed(1) + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Espera:</b>\n            <span class=\"valor-destacado\">{{celda.tiempo_espera}}h</span>\n        </div>\n        \n        <div class=\"celda-controls\">\n            <button class=\"btn-eliminar\" @click=\"eliminarCelda(celda.id)\">Eliminar</button>\n        </div>\n    </div>\n</div>\n\n<script>\nexport default {\n    methods: {\n        eliminarCelda(id) {\n            this.send({payload: {action: 'eliminar', id: id}});\n        }\n    }\n}\n</script>",
-        "storeOutMessages": true,
-        "passthru": true,
-        "resendOnRefresh": true,
-        "templateScope": "local",
-        "className": "",
-        "x": 830,
-        "y": 80,
-        "wires": [
-            [
-                "manejar_eliminar_celda"
-            ]
-        ]
-    },
-    {
-        "id": "a74dea6555fb9a99",
-        "type": "ui-chart",
-        "z": "ba2c364934eb086e",
-        "group": "db6adb7ea7e9c1ec",
-        "name": "Gráfico Producción",
-        "label": "Producción vs Meta por Turno",
-        "order": 1,
-        "chartType": "bar",
-        "category": "",
-        "categoryType": "none",
-        "xAxisLabel": "Turnos",
-        "xAxisProperty": "payload.x",
-        "xAxisPropertyType": "msg",
-        "xAxisType": "category",
-        "xAxisFormat": "",
-        "xAxisFormatType": "auto",
-        "xmin": "",
-        "xmax": "",
-        "yAxisLabel": "Unidades Producidas",
-        "yAxisProperty": "payload.y",
-        "yAxisPropertyType": "msg",
-        "ymin": "0",
-        "ymax": "",
-        "bins": "",
-        "stackSeries": false,
-        "pointRadius": 6,
-        "showLegend": true,
-        "removeOlder": "10",
-        "removeOlderUnit": "points",
-        "removeOlderPoints": "",
-        "colors": [
-            "#3b82f6",
-            "#10b981",
-            "#f59e0b",
-            "#ef4444",
-            "#8b5cf6"
-        ],
-        "textColor": [
-            "#475569"
-        ],
-        "textColorDefault": false,
-        "gridColor": [
-            "#f8fafc"
-        ],
-        "gridColorDefault": false,
+        "name": "Selector de Personal (Staffing)",
+        "order": 2,
         "width": "6",
         "height": "4",
-        "className": "chart-modern",
-        "interpolation": "monotone",
-        "x": 1050,
-        "y": 320,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "485c99aba738de78",
-        "type": "change",
-        "z": "ba2c364934eb086e",
-        "name": "Preparar Msg de Alerta",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "payload.alerta_msg",
-                "tot": "msg"
-            },
-            {
-                "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "Alerta de Producción",
-                "tot": "str"
-            },
-            {
-                "t": "set",
-                "p": "className",
-                "pt": "msg",
-                "to": "payload.hubo_desviacion ? 'alerta-error' : 'alerta-success'",
-                "tot": "jsonata"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 1050,
-        "y": 220,
-        "wires": [
-            [
-                "e74b0236f3965fee"
-            ]
-        ]
-    },
-    {
-        "id": "e1c690f8c7e4b85e",
-        "type": "function",
-        "z": "ba2c364934eb086e",
-        "name": "Motor de Simulación (Gemelo Digital)",
-        "func": "// --- 1. OBTENER ESTADO ANTERIOR (O INICIALIZAR) ---\nlet celdas = flow.get(\"celdas\") || [\n    { id: 1, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 2, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 12, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 3, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 8, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 4, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 },\n    { id: 5, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 15, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0 }\n];\nlet estado_sim = flow.get(\"estado_sim\") || { hora_turno: 0, num_turno: 1, horas_totales: 0 };\n\n// --- 2. OBTENER PARÁMETROS DEL DASHBOARD ---\nlet staffing = flow.get(\"staffing\") || 3;\nlet meta_hora_por_celda = flow.get(\"meta_hora\") || 5;\n\n// --- 3. AVANZAR SIMULACIÓN 1 HORA ---\nestado_sim.hora_turno++;\nestado_sim.horas_totales++;\n\nlet produccion_total_hora = 0;\nlet produccion_total_turno_acumulada = 0;\n\n// --- 4. SIMULACIÓN POR CELDA (Flujo, KPIs) ---\nfor (let i = 0; i < celdas.length; i++) {\n    let celda = celdas[i];\n\n    // 4.1. Reasignación de Personal (Ampliación \"Qué-pasa-si\")\n    if (i < staffing) {\n        // Celda TIENE personal.\n\n        // 4.2. Simulación Cuello de Botella (Objetivo)\n        // Celda 2 depende de Celda 1.\n        if (celda.id === 2 && celdas[0].estado !== 'trabajando') {\n            celda.estado = 'esperando';\n            celda.tiempo_espera += 1; // KPI: Tiempos de espera\n            celda.unid_ok_hora = 0;\n        }\n        // 4.3. Simulación de Falla Aleatoria (para celdas que no están esperando)\n        else if (celda.estado !== 'esperando') {\n            let rand = Math.random();\n            if (rand < 0.85) { // 85% chance de trabajar\n                celda.estado = 'trabajando';\n                // Calcular producción de la hora\n                celda.unid_ok_hora = Math.floor(60 / celda.tiempo_ciclo);\n                celda.unid_ok_total_turno += celda.unid_ok_hora;\n                celda.horas_trabajadas += 1;\n            } else { // 15% chance de falla\n                celda.estado = 'parada';\n                celda.unid_ok_hora = 0;\n            }\n        }\n    } else {\n        // Celda NO tiene personal\n        celda.estado = 'sin_personal';\n        celda.unid_ok_hora = 0;\n    }\n\n    // 4.4. Calcular KPIs de Celda (Variables)\n    // Prevenir división por cero en el primer tick del reseteo\n    if (estado_sim.hora_turno > 0) {\n        celda.utilizacion = (celda.horas_trabajadas / estado_sim.hora_turno) * 100; // KPI: Utilización\n    } else {\n        celda.utilizacion = 0;\n    }\n    produccion_total_turno_acumulada += celda.unid_ok_total_turno;\n    produccion_total_hora += celda.unid_ok_hora;\n}\n\n// --- 5. PREPARAR SALIDAS (Dashboard) ---\n\n// Salida 1: Datos para el Grid de Celdas (se envía siempre)\nlet msg_grid = { payload: celdas };\n\n// Salida 2: Datos para la Tabla Comparativa (se envía siempre)\nlet meta_hora_total_staffed = meta_hora_por_celda * staffing;\nlet msg_tabla = {\n    payload: {\n        hora: estado_sim.hora_turno,\n        turno: estado_sim.num_turno,\n        staffing: staffing,\n        meta_hora: meta_hora_total_staffed,\n        real_hora: produccion_total_hora,\n        meta_turno_acum: meta_hora_total_staffed * estado_sim.hora_turno,\n        real_turno_acum: produccion_total_turno_acumulada\n    }\n};\n\nlet msg_turno_fin = null;\n\n// --- 6. AGREGACIÓN POR TURNO (Flujo) ---\nif (estado_sim.hora_turno >= 8) { // Asumimos turno de 8 horas\n    let meta_total_turno = meta_hora_total_staffed * 8;\n    let real_total_turno = produccion_total_turno_acumulada;\n    let cumplimiento = 0;\n    if (meta_total_turno > 0) {\n        cumplimiento = (real_total_turno / meta_total_turno) * 100;\n    }\n\n    // 6.1. Preparar Salida 3: Datos de fin de turno (Gráfico y Alerta)\n    msg_turno_fin = {\n        payload: {\n            turno: estado_sim.num_turno,\n            meta: meta_total_turno,\n            real: real_total_turno,\n            cumplimiento: cumplimiento,\n            // Mensaje para la alerta\n            alerta_msg: cumplimiento < 90 ?\n                `⚠️ ALERTA: Desviación en Turno ${estado_sim.num_turno}. Cumplimiento: ${cumplimiento.toFixed(1)}%` :\n                `✅ Turno ${estado_sim.num_turno} OK. Cumplimiento: ${cumplimiento.toFixed(1)}%`,\n            // Flag para el switch de alerta\n            hubo_desviacion: cumplimiento < 90\n        }\n    };\n\n    // 6.3. Resetear para el siguiente turno\n    estado_sim.hora_turno = 0;\n    estado_sim.num_turno++;\n    for (let celda of celdas) {\n        celda.unid_ok_total_turno = 0;\n        celda.horas_trabajadas = 0;\n        celda.tiempo_espera = 0;\n        celda.utilizacion = 0;\n    }\n}\n\n// --- 7. GUARDAR ESTADO PARA PRÓXIMO TICK ---\nflow.set(\"celdas\", celdas);\nflow.set(\"estado_sim\", estado_sim);\n\n// Retornar mensajes a las 3 salidas del nodo\nreturn [msg_grid, msg_tabla, msg_turno_fin];",
-        "outputs": 3,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "// Código de inicialización (opcional)\nflow.set(\"celdas\", undefined);\nflow.set(\"estado_sim\", undefined);\nflow.set(\"staffing\", 3);\nflow.set(\"meta_hora\", 5);",
-        "finalize": "",
-        "libs": [],
-        "x": 490,
-        "y": 160,
-        "wires": [
-            [
-                "738e81e8dcb99197"
-            ],
-            [
-                "edc2d2cbdecc5ee8"
-            ],
-            [
-                "abb70d9df99f8eb3",
-                "064ec667edcefcd1"
-            ]
-        ]
-    },
-    {
-        "id": "edc2d2cbdecc5ee8",
-        "type": "ui-template",
-        "z": "ba2c364934eb086e",
-        "group": "81867aea22c8ac4c",
-        "page": "",
-        "ui": "",
-        "name": "Alerta de Desviación 2",
-        "order": 2,
-        "width": 0,
-        "height": 0,
-        "format": "<style>\n    .dashboard-container {\n        background: white;\n        border-radius: 16px;\n        padding: 24px;\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);\n        font-family: 'Segoe UI', system-ui, sans-serif;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .kpi-header {\n        font-size: 1.3em;\n        font-weight: 800;\n        color: #1e293b;\n        margin-bottom: 24px;\n        padding-bottom: 16px;\n        border-bottom: 3px solid #f1f5f9;\n        display: flex;\n        align-items: center;\n        gap: 12px;\n        letter-spacing: -0.5px;\n    }\n    \n    .kpi-grid {\n        display: grid;\n        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));\n        gap: 20px;\n        margin-bottom: 24px;\n    }\n    \n    .kpi-card {\n        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);\n        padding: 20px;\n        border-radius: 12px;\n        border-left: 5px solid #3b82f6;\n        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        border: 1px solid #f1f5f9;\n    }\n    \n    .kpi-card:hover {\n        transform: translateY(-4px);\n        box-shadow: 0 8px 16px rgba(0,0,0,0.12);\n    }\n    \n    .kpi-card.meta { border-left-color: #10b981; }\n    .kpi-card.real { border-left-color: #f59e0b; }\n    .kpi-card.acum { border-left-color: #8b5cf6; }\n    \n    .kpi-label {\n        font-size: 0.9em;\n        color: #64748b;\n        font-weight: 700;\n        text-transform: uppercase;\n        letter-spacing: 0.8px;\n        margin-bottom: 8px;\n    }\n    \n    .kpi-value {\n        font-size: 1.8em;\n        font-weight: 800;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n        letter-spacing: -1px;\n    }\n    \n    .progress-section {\n        margin-top: 24px;\n        background: #f8fafc;\n        padding: 20px;\n        border-radius: 12px;\n        border: 1px solid #e2e8f0;\n    }\n    \n    .progress-label {\n        display: flex;\n        justify-content: space-between;\n        margin-bottom: 10px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n    }\n    \n    .progress-bar {\n        background: #e2e8f0;\n        border-radius: 12px;\n        height: 16px;\n        overflow: hidden;\n        box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);\n    }\n    \n    .progress-fill {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8, #3b82f6);\n        background-size: 200% 200%;\n        height: 100%;\n        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);\n        border-radius: 10px;\n        animation: shimmer 3s infinite;\n    }\n    \n    .turno-info {\n        background: linear-gradient(135deg, #f1f5f9, #e2e8f0);\n        padding: 16px 20px;\n        border-radius: 12px;\n        margin-bottom: 20px;\n        font-size: 0.95em;\n        color: #475569;\n        font-weight: 600;\n        border: 1px solid #e2e8f0;\n    }\n    \n    @keyframes shimmer {\n        0% { background-position: -200% 0; }\n        100% { background-position: 200% 0; }\n    }\n</style>\n\n<div class=\"dashboard-container\">\n    <div class=\"kpi-header\">\n        📊 KPIs EN TIEMPO REAL\n    </div>\n    \n    <div v-if=\"msg.payload\">\n        <div class=\"turno-info\">\n            <strong>Turno {{msg.payload.turno}}</strong> | Hora {{msg.payload.hora}}/8 | Staffing: {{msg.payload.staffing}}\n        </div>\n        \n        <div class=\"kpi-grid\">\n            <div class=\"kpi-card meta\">\n                <div class=\"kpi-label\">Meta por Hora</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_hora}}</div>\n            </div>\n            <div class=\"kpi-card real\">\n                <div class=\"kpi-label\">Producción Actual</div>\n                <div class=\"kpi-value\">{{msg.payload.real_hora}}</div>\n            </div>\n            <div class=\"kpi-card acum\">\n                <div class=\"kpi-label\">Meta Acumulada</div>\n                <div class=\"kpi-value\">{{msg.payload.meta_turno_acum}}</div>\n            </div>\n            <div class=\"kpi-card\">\n                <div class=\"kpi-label\">Real Acumulado</div>\n                <div class=\"kpi-value\">{{msg.payload.real_turno_acum}}</div>\n            </div>\n        </div>\n        \n        <div class=\"progress-section\">\n            <div class=\"progress-label\">\n                <span>Progreso del Turno</span>\n                <span>{{Math.round((msg.payload.hora/8)*100)}}%</span>\n            </div>\n            <div class=\"progress-bar\">\n                <div class=\"progress-fill\" :style=\"{ width: (msg.payload.hora/8)*100 + '%' }\"></div>\n            </div>\n        </div>\n    </div>\n    <div v-else>\n        <div style=\"text-align: center; color: #64748b; padding: 40px;\">\n            <div style=\"font-size: 3em; margin-bottom: 16px;\">⏳</div>\n            Esperando datos de simulación...\n        </div>\n    </div>\n</div>",
+        "format": "<style>\n    .staffing-selector-container {\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        padding: 20px 0;\n        width: 100%;\n        gap: 12px;\n        flex-wrap: wrap;\n    }\n\n    .staffing-person-icon {\n        font-size: 2.5em;\n        cursor: pointer;\n        transition: all 0.3s ease-in-out;\n        padding: 15px;\n        border-radius: 12px;\n        background: linear-gradient(145deg, #f0f0f0, #cacaca);\n        box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;\n        position: relative;\n        user-select: none;\n    }\n\n    /* Estado NO seleccionado */\n    .staffing-person-icon:not(.active) {\n        filter: grayscale(100%);\n        opacity: 0.4;\n    }\n\n    .staffing-person-icon:not(.active):hover {\n        transform: scale(1.1);\n        opacity: 0.6;\n        box-shadow: 2px 2px 4px #bebebe, -2px -2px 4px #ffffff;\n    }\n\n    /* Estado SELECCIONADO (activo) */\n    .staffing-person-icon.active {\n        background: linear-gradient(145deg, #00bfa5, #009688);\n        box-shadow: \n            0 4px 15px rgba(0, 150, 136, 0.4),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        filter: grayscale(0%);\n        transform: scale(1.05);\n        animation: pulse 2s ease-in-out infinite;\n    }\n\n    .staffing-person-icon.active:hover {\n        transform: scale(1.15);\n        box-shadow: \n            0 6px 20px rgba(0, 150, 136, 0.6),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n    }\n\n    /* Badge con el número */\n    .person-badge {\n        position: absolute;\n        bottom: -5px;\n        right: -5px;\n        background: #FF5722;\n        color: white;\n        font-size: 0.4em;\n        font-weight: bold;\n        border-radius: 50%;\n        width: 1.4em;\n        height: 1.4em;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        border: 2px solid white;\n        box-shadow: 0 2px 4px rgba(0,0,0,0.3);\n    }\n\n    .staffing-person-icon.active .person-badge {\n        background: #4CAF50;\n    }\n\n    /* Animación de pulso para activos */\n    @keyframes pulse {\n        0%, 100% {\n            box-shadow: \n                0 4px 15px rgba(0, 150, 136, 0.4),\n                inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        }\n        50% {\n            box-shadow: \n                0 4px 25px rgba(0, 150, 136, 0.7),\n                inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        }\n    }\n\n    .staffing-label {\n        font-size: 1.1em;\n        font-weight: bold;\n        margin-bottom: 15px;\n        color: #333;\n        text-align: center;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        gap: 10px;\n    }\n\n    .staffing-count {\n        background: linear-gradient(145deg, #009688, #00bfa5);\n        color: white;\n        padding: 8px 20px;\n        border-radius: 20px;\n        font-size: 1.2em;\n        box-shadow: 0 3px 8px rgba(0, 150, 136, 0.4);\n        min-width: 60px;\n        text-align: center;\n    }\n</style>\n\n<div>\n    <div class=\"staffing-label\">\n        👥 Personal Asignado: \n        <span class=\"staffing-count\">{{currentStaffing}}/{{maxStaffing}}</span>\n    </div>\n\n    <div class=\"staffing-selector-container\">\n        <span v-for=\"i in maxStaffing\"\n              :key=\"i\"\n              class=\"staffing-person-icon\"\n              :class=\"{ 'active': i <= currentStaffing }\"\n              @click=\"sendStaffing(i)\">\n            👤\n            <span class=\"person-badge\">{{i}}</span>\n        </span>\n    </div>\n</div>\n\n<script>\n    export default {\n        data() {\n            return {\n                currentStaffing: 3,\n                maxStaffing: 6\n            }\n        },\n        \n        watch: {\n            msg: {\n                handler(newMsg) {\n                    if (newMsg && newMsg.payload !== undefined) {\n                        let val = parseInt(newMsg.payload, 10);\n                        if (!isNaN(val) && val >= 1 && val <= this.maxStaffing) {\n                            this.currentStaffing = val;\n                        }\n                    }\n                    \n                    if (newMsg && newMsg.numCeldas !== undefined) {\n                        let numCeldas = parseInt(newMsg.numCeldas, 10);\n                        if (!isNaN(numCeldas) && numCeldas > 0) {\n                            this.maxStaffing = numCeldas;\n                            if (this.currentStaffing > numCeldas) {\n                                this.currentStaffing = numCeldas;\n                                this.send({ payload: numCeldas });\n                            }\n                        }\n                    }\n                },\n                deep: true\n            }\n        },\n        \n        mounted() {\n            // Enviar valor inicial\n            this.send({ payload: this.currentStaffing });\n        },\n        \n        methods: {\n            sendStaffing(count) {\n                // CRÍTICO: Actualizar el data local primero\n                this.currentStaffing = count;\n                \n                // Luego enviar a Node-RED\n                this.send({ payload: count });\n            }\n        }\n    }\n</script>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "name": "Alerta de Desviación 2",
-        "x": 1320,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "6ccd8ea09ec38a00",
-        "type": "function",
-        "z": "ba2c364934eb086e",
-        "name": "Formatear Gráfico (por Turno)",
-        "func": "// msg.payload = { turno: 1, meta: X, real: Y, ... }\nlet p = msg.payload;\nlet category = `T${p.turno}`; // La etiqueta para el eje X, ej: \"T1\"\n\n// Mensaje para la barra \"Real\"\nlet msg_real = {\n    topic: \"Producción Real\",\n    payload: {\n        x: category,\n        y: p.real\n    }\n};\n\n// Mensaje para la barra \"Meta\"\nlet msg_meta = {\n    topic: \"Meta de Turno\",\n    payload: {\n        x: category,\n        y: p.meta\n    }\n};\n\n// Retorna un array de mensajes.\n// El ui-chart los recibirá y los ploteará como dos barras\n// en la misma categoría (ej. \"T1\")\nreturn [msg_real, msg_meta];",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 800,
-        "y": 320,
+        "x": 710,
+        "y": 400,
         "wires": [
             [
-                "a74dea6555fb9a99"
-            ]
-        ]
-    },
-    {
-        "id": "7b621d826eac247d",
-        "type": "change",
-        "z": "ba2c364934eb086e",
-        "name": "set flow.staffing",
-        "rules": [
-            {
-                "t": "set",
-                "p": "staffing",
-                "pt": "flow",
-                "to": "payload",
-                "tot": "msg"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 420,
-        "y": 300,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "14f5248e9d96fc36",
-        "type": "change",
-        "z": "ba2c364934eb086e",
-        "name": "set flow.meta_hora",
-        "rules": [
-            {
-                "t": "set",
-                "p": "meta_hora",
-                "pt": "flow",
-                "to": "payload",
-                "tot": "msg"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 470,
-        "y": 360,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "manejar_agregar_celda",
-        "type": "function",
-        "z": "ba2c364934eb086e",
-        "name": "Manejar Agregar Celda",
-        "func": "// Obtener el array actual de celdas\nlet celdas = flow.get(\"celdas\") || [];\n\n// Crear una nueva celda\nlet nuevoId = celdas.length > 0 ? Math.max(...celdas.map(c => c.id)) + 1 : 1;\nlet nuevaCelda = {\n    id: nuevoId,\n    estado: \"parada\",\n    unid_ok_hora: 0,\n    unid_ok_total_turno: 0,\n    tiempo_ciclo: 10 + Math.floor(Math.random() * 10), // Tiempo ciclo aleatorio entre 10-19\n    utilizacion: 0,\n    tiempo_espera: 0,\n    horas_trabajadas: 0\n};\n\n// Agregar la nueva celda\nceldas.push(nuevaCelda);\n\n// Guardar en el flow\nflow.set(\"celdas\", celdas);\n\n// Enviar mensaje para actualizar el grid\nlet msg_grid = { payload: celdas };\nreturn [msg_grid];",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 420,
-        "y": 420,
-        "wires": [
-            [
-                "bccbedf51a20ae0c"
-            ]
-        ]
-    },
-    {
-        "id": "manejar_eliminar_celda",
-        "type": "function",
-        "z": "ba2c364934eb086e",
-        "name": "Manejar Eliminar Celda",
-        "func": "let celdas = flow.get(\"celdas\") || [];\nlet id = msg.payload.id;\n\n// Eliminar la celda con el id\nceldas = celdas.filter(c => c.id !== id);\n\n// Guardar el nuevo array\nflow.set(\"celdas\", celdas);\n\n// Enviar el nuevo array al grid\nlet msg_grid = { payload: celdas };\nreturn [msg_grid];",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 420,
-        "y": 460,
-        "wires": [
-            [
-                "bccbedf51a20ae0c"
+                "3daa990ceced0393"
             ]
         ]
     }
