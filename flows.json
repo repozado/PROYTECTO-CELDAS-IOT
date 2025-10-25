@@ -91,20 +91,6 @@
         "disabled": "false"
     },
     {
-        "id": "6e18838a8ce84c0b",
-        "type": "ui-group",
-        "name": "Estado de celda",
-        "page": "88c45a61e84912b1",
-        "width": 6,
-        "height": 1,
-        "order": 3,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
         "id": "14dca520c1815b77",
         "type": "ui-group",
         "name": "KPIs por turno",
@@ -239,6 +225,20 @@
         "groupType": "default"
     },
     {
+        "id": "188cf3cd1bf9e177",
+        "type": "ui-group",
+        "name": "Estado de Celdas",
+        "page": "88c45a61e84912b1",
+        "width": 6,
+        "height": 4,
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
         "id": "47138b9a4c89ed44",
         "type": "ui-notification",
         "z": "3621d9ebf4c24432",
@@ -271,7 +271,7 @@
         "order": 1,
         "width": 0,
         "height": 0,
-        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));\n        gap: 15px;\n        padding: 20px;\n        background: #f8fafc;\n        border-radius: 12px;\n    }\n    .celda {\n        border: 1px solid #e2e8f0;\n        border-radius: 12px;\n        padding: 15px;\n        text-align: center;\n        color: #2d3748;\n        transition: all 0.3s ease;\n        background: white;\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        position: relative;\n        overflow: hidden;\n    }\n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 4px;\n    }\n    .celda-title {\n        font-weight: 700;\n        font-size: 1.1em;\n        margin-bottom: 12px;\n        padding-bottom: 8px;\n        border-bottom: 2px solid #f1f5f9;\n        color: #1e293b;\n    }\n    .celda-kpi {\n        font-size: 0.85em;\n        text-align: left;\n        margin-top: 6px;\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n    }\n    .celda-kpi b {\n        color: #64748b;\n        font-weight: 600;\n    }\n    \n    /* Estados con colores modernos */\n    .celda-estado-trabajando::before { background: linear-gradient(135deg, #10b981, #059669); }\n    .celda-estado-trabajando { border-top: 4px solid #10b981; }\n    \n    .celda-estado-parada::before { background: linear-gradient(135deg, #ef4444, #dc2626); }\n    .celda-estado-parada { border-top: 4px solid #ef4444; }\n    \n    .celda-estado-esperando::before { background: linear-gradient(135deg, #f59e0b, #d97706); }\n    .celda-estado-esperando { border-top: 4px solid #f59e0b; }\n    \n    .celda-estado-sin_personal::before { background: linear-gradient(135deg, #6b7280, #4b5563); }\n    .celda-estado-sin_personal { border-top: 4px solid #6b7280; }\n\n    /* Barra de utilización mejorada */\n    .util-bar-container {\n        background-color: #e2e8f0;\n        border-radius: 8px;\n        height: 16px;\n        width: 100%;\n        margin-top: 8px;\n        border: 1px solid #cbd5e1;\n        overflow: hidden;\n        position: relative;\n    }\n    .util-bar-value {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8);\n        height: 100%;\n        transition: width 0.5s ease;\n        border-radius: 6px;\n    }\n    \n    /* Imágenes de estado mejoradas */\n    .estado-imagen {\n        width: 48px;\n        height: 48px;\n        margin: 0 auto 10px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        filter: brightness(0.9);\n    }\n    .imagen-trabajando { background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064039.png'); }\n    .imagen-parada { background-image: url('https://cdn-icons-png.flaticon.com/512/458/458594.png'); }\n    .imagen-esperando { background-image: url('https://cdn-icons-png.flaticon.com/512/3305/3305803.png'); }\n    .imagen-sin_personal { background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828843.png'); }\n    \n    .estado-texto {\n        font-size: 0.75em;\n        font-weight: 700;\n        margin-bottom: 8px;\n        padding: 4px 8px;\n        border-radius: 6px;\n        text-transform: uppercase;\n        letter-spacing: 0.5px;\n    }\n    .estado-trabajando { background: #d1fae5; color: #065f46; }\n    .estado-parada { background: #fee2e2; color: #991b1b; }\n    .estado-esperando { background: #fef3c7; color: #92400e; }\n    .estado-sin_personal { background: #f1f5f9; color: #374151; }\n    \n    .valor-destacado {\n        font-weight: 700;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n    }\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n        \n        <!-- Imagen representativa del estado -->\n        <div class=\"estado-imagen\" :class=\"'imagen-' + celda.estado\"></div>\n        <div class=\"estado-texto\" :class=\"'estado-' + celda.estado\">{{celda.estado.toUpperCase()}}</div>\n        \n        <div class=\"celda-kpi\">\n            <b>Prod/h:</b>\n            <span class=\"valor-destacado\">{{celda.unid_ok_hora}}</span>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Util:</b>\n            <span class=\"valor-destacado\">{{celda.utilizacion.toFixed(1)}}%</span>\n        </div>\n        <div class=\"util-bar-container\">\n            <div class=\"util-bar-value\" :style=\"{ width: celda.utilizacion.toFixed(1) + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Espera:</b>\n            <span class=\"valor-destacado\">{{celda.tiempo_espera}}h</span>\n        </div>\n    </div>\n</div>",
+        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));\n        gap: 15px;\n        padding: 20px;\n        background: #f8fafc;\n        border-radius: 12px;\n    }\n    .celda {\n        border: 1px solid #e2e8f0;\n        border-radius: 12px;\n        padding: 15px;\n        text-align: center;\n        color: #2d3748;\n        transition: all 0.3s ease;\n        background: white;\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        position: relative;\n        overflow: hidden;\n    }\n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 4px;\n    }\n    .celda-title {\n        font-weight: 700;\n        font-size: 1.1em;\n        margin-bottom: 12px;\n        padding-bottom: 8px;\n        border-bottom: 2px solid #f1f5f9;\n        color: #1e293b;\n    }\n    .celda-kpi {\n        font-size: 0.85em;\n        text-align: left;\n        margin-top: 6px;\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n    }\n    .celda-kpi b {\n        color: #64748b;\n        font-weight: 600;\n    }\n    \n    /* Estados con colores modernos */\n    .celda-estado-trabajando::before { background: linear-gradient(135deg, #10b981, #059669); }\n    .celda-estado-trabajando { border-top: 4px solid #10b981; }\n    \n    .celda-estado-parada::before { background: linear-gradient(135deg, #ef4444, #dc2626); }\n    .celda-estado-parada { border-top: 4px solid #ef4444; }\n    \n    .celda-estado-esperando::before { background: linear-gradient(135deg, #f59e0b, #d97706); }\n    .celda-estado-esperando { border-top: 4px solid #f59e0b; }\n    \n    .celda-estado-sin_personal::before { background: linear-gradient(135deg, #6b7280, #4b5563); }\n    .celda-estado-sin_personal { border-top: 4px solid #6b7280; }\n\n    /* Barra de utilización mejorada */\n    .util-bar-container {\n        background-color: #e2e8f0;\n        border-radius: 8px;\n        height: 16px;\n        width: 100%;\n        margin-top: 8px;\n        border: 1px solid #cbd5e1;\n        overflow: hidden;\n        position: relative;\n    }\n    .util-bar-value {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8);\n        height: 100%;\n        transition: width 0.5s ease;\n        border-radius: 6px;\n    }\n    \n    /* Imágenes de estado mejoradas */\n    .estado-imagen {\n        width: 48px;\n        height: 48px;\n        margin: 0 auto 10px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        filter: brightness(0.9);\n    }\n    .imagen-trabajando { background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064039.png'); }\n    .imagen-parada { background-image: url('https://cdn-icons-png.flaticon.com/512/458/458594.png'); }\n    .imagen-esperando { background-image: url('https://cdn-icons-png.flaticon.com/512/3305/3305803.png'); }\n    .imagen-sin_personal { background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828843.png'); }\n    \n    .estado-texto {\n        font-size: 0.75em;\n        font-weight: 700;\n        margin-bottom: 8px;\n        padding: 4px 8px;\n        border-radius: 6px;\n        text-transform: uppercase;\n        letter-spacing: 0.5px;\n    }\n    .estado-trabajando { background: #d1fae5; color: #065f46; }\n    .estado-parada { background: #fee2e2; color: #991b1b; }\n    .estado-esperando { background: #fef3c7; color: #92400e; }\n    .estado-sin_personal { background: #f1f5f9; color: #374151; }\n    \n    .valor-destacado {\n        font-weight: 700;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n    }\n\n    /* Proceso y Progreso (Integrado) */\n    .proceso-tag {\n        font-size: 0.7em;\n        font-weight: 700;\n        padding: 4px 8px;\n        border-radius: 12px;\n        margin: 4px 0;\n        text-transform: uppercase;\n        letter-spacing: 0.5px;\n        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);\n        color: #3730a3;\n        border: 1px solid #a5b4fc;\n    }\n    .proceso-corte { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border-color: #f59e0b; }\n    .proceso-costura { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; border-color: #3b82f6; }\n    .proceso-inspeccion { background: linear-gradient(135deg, #f0fdf4, #dcfce7); color: #166534; border-color: #22c55e; }\n    .proceso-empaque { background: linear-gradient(135deg, #fdf4ff, #fae8ff); color: #7c3aed; border-color: #a78bfa; }\n\n    .progreso-bar-container {\n        background: #e2e8f0;\n        border-radius: 8px;\n        height: 8px;\n        width: 100%;\n        margin: 6px 0;\n        overflow: hidden;\n        box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);\n    }\n    .progreso-bar-fill {\n        height: 100%;\n        background: linear-gradient(90deg, #3b82f6, #1d4ed8);\n        border-radius: 6px;\n        transition: width 0.6s ease;\n    }\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n        \n        <!-- Imagen representativa del estado -->\n        <div class=\"estado-imagen\" :class=\"'imagen-' + celda.estado\"></div>\n        <div class=\"estado-texto\" :class=\"'estado-' + celda.estado\">{{celda.estado.toUpperCase()}}</div>\n        \n        <!-- Proceso y Progreso (solo si trabajando) -->\n        <div v-if=\"celda.estado === 'trabajando'\" class=\"proceso-tag proceso-{{celda.proceso}}\">\n            {{getProcesoLabel(celda.proceso)}}\n        </div>\n        <div v-if=\"celda.estado === 'trabajando'\" class=\"progreso-bar-container\">\n            <div class=\"progreso-bar-fill\" :style=\"{ width: celda.progreso + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Prod/h:</b>\n            <span class=\"valor-destacado\">{{celda.unid_ok_hora}}</span>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Util:</b>\n            <span class=\"valor-destacado\">{{celda.utilizacion.toFixed(1)}}%</span>\n        </div>\n        <div class=\"util-bar-container\">\n            <div class=\"util-bar-value\" :style=\"{ width: celda.utilizacion.toFixed(1) + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Espera:</b>\n            <span class=\"valor-destacado\">{{celda.tiempo_espera}}h</span>\n        </div>\n    </div>\n</div>\n\n<script>\n    export default {\n        methods: {\n            getProcesoLabel(proceso) {\n                const labels = {\n                    'corte': 'Corte',\n                    'costura': 'Costura',\n                    'inspeccion': 'Inspección',\n                    'empaque': 'Empaque'\n                };\n                return labels[proceso] || proceso;\n            }\n        }\n    }\n</script>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
@@ -607,7 +607,7 @@
         ]
     },
     {
-        "id": "5c5967b68965d682",
+        "id": "76bddd3f9bf78646",
         "type": "inject",
         "z": "4c0973556f015184",
         "name": "Simular 1 Hora (cada 5 seg)",
@@ -623,43 +623,66 @@
         "topic": "",
         "payload": "tick",
         "payloadType": "str",
-        "x": 200,
+        "x": 1480,
         "y": 140,
         "wires": [
             [
-                "94ee969be98e728e"
+                "0bcb74ef01a342e7"
             ]
         ]
     },
     {
-        "id": "94ee969be98e728e",
+        "id": "0bcb74ef01a342e7",
         "type": "function",
         "z": "4c0973556f015184",
         "name": "Motor de Simulación (Gemelo Digital)",
-        "func": "// --- 1. OBTENER ESTADO ANTERIOR (O INICIALIZAR) ---\nconst PROCESOS = ['corte', 'costura', 'inspeccion', 'empaque'];\n\nlet celdas = flow.get(\"celdas\") || [\n    { id: 1, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 2, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 12, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 3, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 8, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 4, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 5, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 15, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 },\n    { id: 6, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0 }\n];\nlet estado_sim = flow.get(\"estado_sim\") || { hora_turno: 0, num_turno: 1, horas_totales: 0 };\n\n// --- 2. OBTENER PARÁMETROS DEL DASHBOARD ---\nlet staffing = flow.get(\"staffing\") || 3;\nlet meta_hora_por_celda = flow.get(\"meta_hora\") || 5;\n\n// --- 3. AVANZAR SIMULACIÓN 1 HORA ---\nestado_sim.hora_turno++;\nestado_sim.horas_totales++;\n\nlet produccion_total_hora = 0;\nlet produccion_total_turno_acumulada = 0;\n\n// --- 4. SIMULACIÓN POR CELDA (Flujo, KPIs) ---\nfor (let i = 0; i < celdas.length; i++) {\n    let celda = celdas[i];\n    celda.unid_ok_hora = 0; // Reseteamos la producción de esta hora\n    \n    // 4.1. Reasignación de Personal\n    if (i < staffing) {\n        \n        // 4.2. Simulación Cuello de Botella\n        if (celda.id === 2 && celdas[0].estado !== 'trabajando') {\n            celda.estado = 'esperando';\n            celda.tiempo_espera += 1;\n            celda.progreso = 0; // Pausa y resetea progreso si espera\n        } \n        // 4.3. Simulación de Falla Aleatoria\n        else if (celda.estado !== 'esperando') {\n            let rand = Math.random();\n            if (celda.estado === 'parada' && rand < 0.2) {\n                celda.estado = 'trabajando'; // 20% chance de repararse\n            }\n\n            if (celda.estado === 'trabajando') {\n                if (rand < 0.15) { // 15% chance de falla\n                    celda.estado = 'parada';\n                    celda.progreso = 0; // Resetea progreso al fallar\n                } else {\n                    // --- LÓGICA DE PROCESO TEXTIL ---\n                    celda.progreso += 25; // Avanza 25% por \"hora\" (tick)\n                    celda.horas_trabajadas += 1;\n                    \n                    if (celda.progreso >= 100) {\n                        celda.progreso = 0;\n                        let idx_actual = PROCESOS.indexOf(celda.proceso);\n                        \n                        if (idx_actual >= PROCESOS.length - 1) { // Si estaba en 'empaque'\n                            // Proceso terminado, 1 unidad producida\n                            celda.proceso = PROCESOS[0]; // Vuelve a 'corte'\n                            celda.unid_ok_hora = 1; \n                            celda.unid_ok_total_turno += 1;\n                        } else {\n                            celda.proceso = PROCESOS[idx_actual + 1]; // Avanza al siguiente proceso\n                        }\n                    }\n                    // --- FIN LÓGICA TEXTIL ---\n                }\n            } else if (celda.estado === 'parada') {\n                // Sigue en parada, no hace nada\n            }\n        }\n    } else {\n        // Celda NO tiene personal\n        celda.estado = 'sin_personal';\n        celda.progreso = 0;\n    }\n    \n    // 4.4. Calcular KPIs de Celda\n    if (estado_sim.hora_turno > 0) {\n        celda.utilizacion = (celda.horas_trabajadas / estado_sim.hora_turno) * 100;\n    } else {\n        celda.utilizacion = 0;\n    }\n    produccion_total_turno_acumulada += celda.unid_ok_total_turno;\n    produccion_total_hora += celda.unid_ok_hora;\n}\n\n// --- 5. PREPARAR SALIDAS (Dashboard) ---\n\n// Salida 1: Datos para el Grid de Celdas (se envía siempre)\nlet msg_grid = { payload: celdas };\n\n// Salida 2: Datos para la Tabla Comparativa (se envía siempre)\nlet meta_hora_total_staffed = meta_hora_por_celda * staffing;\nlet msg_tabla = { \n    payload: {\n        hora: estado_sim.hora_turno,\n        turno: estado_sim.num_turno,\n        staffing: staffing,\n        meta_hora: meta_hora_total_staffed,\n        real_hora: produccion_total_hora,\n        meta_turno_acum: meta_hora_total_staffed * estado_sim.hora_turno,\n        real_turno_acum: produccion_total_turno_acumulada\n    }\n};\n\nlet msg_turno_fin = null;\n\n// --- 6. AGREGACIÓN POR TURNO (Flujo) ---\nif (estado_sim.hora_turno >= 8) { // Asumimos turno de 8 horas\n    let meta_total_turno = meta_hora_total_staffed * 8;\n    let real_total_turno = produccion_total_turno_acumulada;\n    let cumplimiento = 0;\n    if (meta_total_turno > 0) {\n        cumplimiento = (real_total_turno / meta_total_turno) * 100;\n    }\n    \n    // 6.1. Preparar Salida 3: Datos de fin de turno (Gráfico y Alerta)\n    msg_turno_fin = {\n        payload: {\n            turno: estado_sim.num_turno,\n            meta: meta_total_turno,\n            real: real_total_turno,\n            cumplimiento: cumplimiento,\n            alerta_msg: cumplimiento < 90 ? \n                `ALERTA: Desviación en Turno ${estado_sim.num_turno}. Cumplimiento: ${cumplimiento.toFixed(1)}%` : \n                `Turno ${estado_sim.num_turno} OK. Cumplimiento: ${cumplimiento.toFixed(1)}%`,\n            hubo_desviacion: cumplimiento < 90\n        }\n    };\n    \n    // 6.3. Resetear para el siguiente turno\n    estado_sim.hora_turno = 0;\n    estado_sim.num_turno++;\n    for (let celda of celdas) {\n        celda.unid_ok_total_turno = 0;\n        celda.horas_trabajadas = 0;\n        celda.tiempo_espera = 0;\n        celda.utilizacion = 0;\n        celda.progreso = 0;\n        celda.proceso = 'corte';\n    }\n}\n\n// --- 7. GUARDAR ESTADO PARA PRÓXIMO TICK ---\nflow.set(\"celdas\", celdas);\nflow.set(\"estado_sim\", estado_sim);\n// Al final del nodo \"Motor de Simulación\", antes del return\nlet msg_staffing_config = { numCeldas: celdas.length };\n\n// Cambiar el return para incluir una 4ta salida\nreturn [ msg_grid, msg_tabla, msg_turno_fin, msg_staffing_config ];\n// Retornar mensajes a las 3 salidas del nodo\nreturn [ msg_grid, msg_tabla, msg_turno_fin ];",
+        "func": "// --- 1. OBTENER ESTADO ANTERIOR (O INICIALIZAR) ---\nconst PROCESOS = ['corte', 'costura', 'inspeccion', 'empaque'];\n\nlet celdas = flow.get(\"celdas\") || [\n    { id: 1, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0, bottleneck_count: 0 },\n    { id: 2, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 12, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0, bottleneck_count: 0 },\n    { id: 3, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 8, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0, bottleneck_count: 0 },\n    { id: 4, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0, bottleneck_count: 0 },\n    { id: 5, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 15, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0, bottleneck_count: 0 },\n    { id: 6, estado: \"parada\", unid_ok_hora: 0, unid_ok_total_turno: 0, tiempo_ciclo: 10, utilizacion: 0, tiempo_espera: 0, horas_trabajadas: 0, proceso: 'corte', progreso: 0, bottleneck_count: 0 }\n];\nlet estado_sim = flow.get(\"estado_sim\") || { hora_turno: 0, num_turno: 1, horas_totales: 0 };\n\n// --- 2. OBTENER PARÁMETROS DEL DASHBOARD ---\nlet staffing = flow.get(\"staffing\") || 3;\nlet meta_hora_por_celda = flow.get(\"meta_hora\") || 5;\n\n// --- Detectar si es update de params o simulación qué-pasa-si ---\nconst isParamUpdate = msg.payload !== \"tick\";\nconst isSimReasignacion = msg.payload === \"sim_reasignacion\";\nlet temp_staffing = isSimReasignacion ? (staffing + 1) : staffing;\n\nlet produccion_total_hora = 0;\nlet produccion_total_turno_acumulada = 0;\n\nif (!isParamUpdate && !isSimReasignacion) {\n    // --- 3. AVANZAR SIMULACIÓN 1 HORA (solo en tick normal) ---\n    estado_sim.hora_turno++;\n    estado_sim.horas_totales++;\n}\n\n// --- 4. SIMULACIÓN POR CELDA (Flujo, KPIs) ---\nfor (let i = 0; i < celdas.length; i++) {\n    let celda = celdas[i];\n    if (!isParamUpdate && !isSimReasignacion) {\n        celda.unid_ok_hora = 0;\n    }\n    \n    // 4.1. Reasignación de Personal (usa temp_staffing para simulación)\n    if (i < temp_staffing) {\n        if (celda.estado === 'sin_personal') {\n            celda.estado = 'trabajando';\n            celda.progreso = 0;\n            celda.bottleneck_count = 0;\n        }\n        \n        // 4.2. Simulación Cuello de Botella (solo en tick normal)\n        if (!isParamUpdate && !isSimReasignacion && celda.id === 2) {\n            if (celdas[0].estado !== 'trabajando') {\n                celda.bottleneck_count++;\n                if (celda.bottleneck_count > 2) {\n                    celda.estado = 'esperando';\n                    celda.tiempo_espera += 1;\n                    celda.progreso = 0;\n                }\n            } else {\n                celda.bottleneck_count = 0;\n            }\n        } \n        // 4.3. Simulación de Falla Aleatoria (solo en tick normal)\n        else if (!isParamUpdate && !isSimReasignacion && celda.estado !== 'esperando') {\n            let rand = Math.random();\n            if (celda.estado === 'parada' && rand < 0.4) {\n                celda.estado = 'trabajando';\n            }\n\n            if (celda.estado === 'trabajando') {\n                if (rand < 0.05) {\n                    celda.estado = 'parada';\n                    celda.progreso = 0;\n                } else {\n                    // LÓGICA DE PROCESO TEXTIL (solo en tick normal, productiva)\n                    if (!isParamUpdate && !isSimReasignacion) {\n                        celda.progreso += 100;\n                        celda.horas_trabajadas += 1;\n                        celda.unid_ok_hora += (60 / celda.tiempo_ciclo);\n                        celda.unid_ok_total_turno += (60 / celda.tiempo_ciclo);\n                        \n                        if (celda.progreso >= 100) {\n                            celda.progreso = 0;\n                            let idx_actual = PROCESOS.indexOf(celda.proceso);\n                            \n                            if (idx_actual >= PROCESOS.length - 1) {\n                                celda.proceso = PROCESOS[0];\n                            } else {\n                                celda.proceso = PROCESOS[idx_actual + 1];\n                            }\n                        }\n                    }\n                }\n            } else if (celda.estado === 'parada' && !isParamUpdate && !isSimReasignacion) {\n                celda.tiempo_espera += 1;\n            }\n        }\n    } else {\n        celda.estado = 'sin_personal';\n        celda.progreso = 0;\n        celda.unid_ok_hora = 0;\n        celda.bottleneck_count = 0;\n    }\n    \n    // 4.4. Calcular KPIs (siempre)\n    if (estado_sim.hora_turno > 0) {\n        celda.utilizacion = (celda.horas_trabajadas / estado_sim.hora_turno) * 100;\n    } else {\n        celda.utilizacion = 0;\n    }\n    produccion_total_turno_acumulada += celda.unid_ok_total_turno;\n    if (!isParamUpdate && !isSimReasignacion) {\n        produccion_total_hora += celda.unid_ok_hora;\n    }\n}\n\n// --- 5. PREPARAR SALIDAS (igual) ---\nlet msg_grid = { payload: celdas };\n\nlet meta_hora_total_staffed = meta_hora_por_celda * temp_staffing;\nlet msg_tabla = { \n    payload: {\n        hora: estado_sim.hora_turno,\n        turno: estado_sim.num_turno,\n        staffing: temp_staffing,\n        meta_hora: meta_hora_total_staffed,\n        real_hora: produccion_total_hora,\n        meta_turno_acum: meta_hora_total_staffed * estado_sim.hora_turno,\n        real_turno_acum: produccion_total_turno_acumulada,\n        is_simulacion: isSimReasignacion\n    }\n};\n\nlet msg_turno_fin = null;\n\n// --- 6. AGREGACIÓN POR TURNO (solo en tick normal) ---\nif (!isParamUpdate && !isSimReasignacion && estado_sim.hora_turno >= 8) {\n    let meta_total_turno = meta_hora_total_staffed * 8;\n    let real_total_turno = produccion_total_turno_acumulada;\n    let cumplimiento = meta_total_turno > 0 ? (real_total_turno / meta_total_turno) * 100 : 0;\n    \n    msg_turno_fin = {\n        payload: {\n            turno: estado_sim.num_turno,\n            meta: meta_total_turno,\n            real: real_total_turno,\n            cumplimiento: cumplimiento,\n            alerta_msg: cumplimiento < 90 ? \n                `ALERTA: Desviación en Turno ${estado_sim.num_turno}. Cumplimiento: ${cumplimiento.toFixed(1)}%` : \n                `Turno ${estado_sim.num_turno} OK. Cumplimiento: ${cumplimiento.toFixed(1)}%`,\n            hubo_desviacion: cumplimiento < 90\n        }\n    };\n    \n    // Reset turno\n    estado_sim.hora_turno = 0;\n    estado_sim.num_turno++;\n    for (let celda of celdas) {\n        celda.unid_ok_total_turno = 0;\n        celda.horas_trabajadas = 0;\n        celda.tiempo_espera = 0;\n        celda.utilizacion = 0;\n        celda.progreso = 0;\n        celda.proceso = 'corte';\n        celda.bottleneck_count = 0;\n    }\n}\n\n// --- 7. GUARDAR ESTADO (solo si no es simulación) ---\nif (!isSimReasignacion) {\n    flow.set(\"celdas\", celdas);\n    flow.set(\"estado_sim\", estado_sim);\n}\n\nreturn [ msg_grid, msg_tabla, msg_turno_fin ];",
         "outputs": 3,
         "timeout": 0,
         "noerr": 0,
         "initialize": "// Código de inicialización (opcional)\nflow.set(\"celdas\", undefined);\nflow.set(\"estado_sim\", undefined);",
         "finalize": "",
         "libs": [],
-        "x": 490,
+        "x": 1770,
         "y": 140,
         "wires": [
             [
-                "74e87c149faf9999"
+                "532090cdaaff3863"
             ],
             [
-                "091252891773a22f"
+                "091f71284495b57c"
             ],
             [
-                "19b5db394a7e9860",
-                "19d141e1644cd53d"
+                "516042e73e6bf168",
+                "b2ac42aea3aecc3a"
             ]
         ]
     },
     {
-        "id": "091252891773a22f",
+        "id": "532090cdaaff3863",
+        "type": "ui-template",
+        "z": "4c0973556f015184",
+        "group": "188cf3cd1bf9e177",
+        "page": "",
+        "ui": "",
+        "name": "Grid de Celdas (Proceso Textil)",
+        "order": 1,
+        "width": "0",
+        "height": "0",
+        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));\n        gap: 15px;\n        padding: 20px;\n        background: #f8fafc;\n        border-radius: 12px;\n    }\n    .celda {\n        border: 1px solid #e2e8f0;\n        border-radius: 12px;\n        padding: 15px;\n        text-align: center;\n        color: #2d3748;\n        transition: all 0.3s ease;\n        background: white;\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        position: relative;\n        overflow: hidden;\n    }\n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 4px;\n    }\n    .celda-title {\n        font-weight: 700;\n        font-size: 1.1em;\n        margin-bottom: 12px;\n        padding-bottom: 8px;\n        border-bottom: 2px solid #f1f5f9;\n        color: #1e293b;\n    }\n    .celda-kpi {\n        font-size: 0.85em;\n        text-align: left;\n        margin-top: 6px;\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n    }\n    .celda-kpi b {\n        color: #64748b;\n        font-weight: 600;\n    }\n    \n    /* Estados con colores modernos */\n    .celda-estado-trabajando::before { background: linear-gradient(135deg, #10b981, #059669); }\n    .celda-estado-trabajando { border-top: 4px solid #10b981; }\n    \n    .celda-estado-parada::before { background: linear-gradient(135deg, #ef4444, #dc2626); }\n    .celda-estado-parada { border-top: 4px solid #ef4444; }\n    \n    .celda-estado-esperando::before { background: linear-gradient(135deg, #f59e0b, #d97706); }\n    .celda-estado-esperando { border-top: 4px solid #f59e0b; }\n    \n    .celda-estado-sin_personal::before { background: linear-gradient(135deg, #6b7280, #4b5563); }\n    .celda-estado-sin_personal { border-top: 4px solid #6b7280; }\n\n    /* Barra de utilización mejorada */\n    .util-bar-container {\n        background-color: #e2e8f0;\n        border-radius: 8px;\n        height: 16px;\n        width: 100%;\n        margin-top: 8px;\n        border: 1px solid #cbd5e1;\n        overflow: hidden;\n        position: relative;\n    }\n    .util-bar-value {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8);\n        height: 100%;\n        transition: width 0.5s ease;\n        border-radius: 6px;\n    }\n    \n    /* Imágenes de estado mejoradas */\n    .estado-imagen {\n        width: 48px;\n        height: 48px;\n        margin: 0 auto 10px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        filter: brightness(0.9);\n    }\n    .imagen-trabajando { background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064039.png'); }\n    .imagen-parada { background-image: url('https://cdn-icons-png.flaticon.com/512/458/458594.png'); }\n    .imagen-esperando { background-image: url('https://cdn-icons-png.flaticon.com/512/3305/3305803.png'); }\n    .imagen-sin_personal { background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828843.png'); }\n    \n    .estado-texto {\n        font-size: 0.75em;\n        font-weight: 700;\n        margin-bottom: 8px;\n        padding: 4px 8px;\n        border-radius: 6px;\n        text-transform: uppercase;\n        letter-spacing: 0.5px;\n    }\n    .estado-trabajando { background: #d1fae5; color: #065f46; }\n    .estado-parada { background: #fee2e2; color: #991b1b; }\n    .estado-esperando { background: #fef3c7; color: #92400e; }\n    .estado-sin_personal { background: #f1f5f9; color: #374151; }\n    \n    .valor-destacado {\n        font-weight: 700;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n    }\n\n    /* Proceso y Progreso (Integrado) */\n    .proceso-tag {\n        font-size: 0.7em;\n        font-weight: 700;\n        padding: 4px 8px;\n        border-radius: 12px;\n        margin: 4px 0;\n        text-transform: uppercase;\n        letter-spacing: 0.5px;\n        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);\n        color: #3730a3;\n        border: 1px solid #a5b4fc;\n    }\n    .proceso-corte { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border-color: #f59e0b; }\n    .proceso-costura { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; border-color: #3b82f6; }\n    .proceso-inspeccion { background: linear-gradient(135deg, #f0fdf4, #dcfce7); color: #166534; border-color: #22c55e; }\n    .proceso-empaque { background: linear-gradient(135deg, #fdf4ff, #fae8ff); color: #7c3aed; border-color: #a78bfa; }\n\n    .progreso-bar-container {\n        background: #e2e8f0;\n        border-radius: 8px;\n        height: 8px;\n        width: 100%;\n        margin: 6px 0;\n        overflow: hidden;\n        box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);\n    }\n    .progreso-bar-fill {\n        height: 100%;\n        background: linear-gradient(90deg, #3b82f6, #1d4ed8);\n        border-radius: 6px;\n        transition: width 0.6s ease;\n    }\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n        \n        <!-- Imagen representativa del estado -->\n        <div class=\"estado-imagen\" :class=\"'imagen-' + celda.estado\"></div>\n        <div class=\"estado-texto\" :class=\"'estado-' + celda.estado\">{{celda.estado.toUpperCase()}}</div>\n        \n        <!-- Proceso y Progreso (solo si trabajando) -->\n        <div v-if=\"celda.estado === 'trabajando'\" class=\"proceso-tag proceso-{{celda.proceso}}\">\n            {{getProcesoLabel(celda.proceso)}}\n        </div>\n        <div v-if=\"celda.estado === 'trabajando'\" class=\"progreso-bar-container\">\n            <div class=\"progreso-bar-fill\" :style=\"{ width: celda.progreso + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Prod/h:</b>\n            <span class=\"valor-destacado\">{{celda.unid_ok_hora}}</span>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Util:</b>\n            <span class=\"valor-destacado\">{{celda.utilizacion.toFixed(1)}}%</span>\n        </div>\n        <div class=\"util-bar-container\">\n            <div class=\"util-bar-value\" :style=\"{ width: celda.utilizacion.toFixed(1) + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Espera:</b>\n            <span class=\"valor-destacado\">{{celda.tiempo_espera}}h</span>\n        </div>\n    </div>\n</div>\n\n<script>\n    export default {\n        methods: {\n            getProcesoLabel(proceso) {\n                const labels = {\n                    'corte': 'Corte',\n                    'costura': 'Costura',\n                    'inspeccion': 'Inspección',\n                    'empaque': 'Empaque'\n                };\n                return labels[proceso] || proceso;\n            }\n        }\n    }\n</script>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 2090,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "091f71284495b57c",
         "type": "ui-template",
         "z": "4c0973556f015184",
         "group": "14dca520c1815b77",
@@ -675,14 +698,14 @@
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 830,
+        "x": 2110,
         "y": 140,
         "wires": [
             []
         ]
     },
     {
-        "id": "90cf93502612e982",
+        "id": "69bbb77977ee39c5",
         "type": "ui-chart",
         "z": "4c0973556f015184",
         "group": "b1e725e9fb17355d",
@@ -735,14 +758,14 @@
         "height": "4",
         "className": "",
         "interpolation": "linear",
-        "x": 1050,
+        "x": 2330,
         "y": 300,
         "wires": [
             []
         ]
     },
     {
-        "id": "19b5db394a7e9860",
+        "id": "516042e73e6bf168",
         "type": "switch",
         "z": "4c0973556f015184",
         "name": "¿Hubo Desviación? (<90%)",
@@ -756,16 +779,16 @@
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 780,
+        "x": 2060,
         "y": 240,
         "wires": [
             [
-                "7a1741004ce6a4bb"
+                "d5550d4369aaac1b"
             ]
         ]
     },
     {
-        "id": "7a1741004ce6a4bb",
+        "id": "d5550d4369aaac1b",
         "type": "change",
         "z": "4c0973556f015184",
         "name": "Preparar Msg de Alerta",
@@ -790,16 +813,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1000,
+        "x": 2280,
         "y": 200,
         "wires": [
             [
-                "d2cb91be66fa5de8"
+                "f6993b24b470ae04"
             ]
         ]
     },
     {
-        "id": "d2cb91be66fa5de8",
+        "id": "f6993b24b470ae04",
         "type": "ui-notification",
         "z": "4c0973556f015184",
         "ui": "9477a706cabb673d",
@@ -816,12 +839,12 @@
         "raw": false,
         "className": "",
         "name": "Alerta de Desviación",
-        "x": 1240,
+        "x": 2520,
         "y": 200,
         "wires": []
     },
     {
-        "id": "958c809fe5cc5216",
+        "id": "6e39912e9d42d1eb",
         "type": "change",
         "z": "4c0973556f015184",
         "name": "set flow.staffing",
@@ -839,14 +862,14 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 1000,
+        "x": 2280,
         "y": 400,
         "wires": [
             []
         ]
     },
     {
-        "id": "dc83e430062df731",
+        "id": "3cacfdc23936e48c",
         "type": "change",
         "z": "4c0973556f015184",
         "name": "set flow.meta_hora",
@@ -864,34 +887,34 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 970,
+        "x": 2250,
         "y": 460,
         "wires": [
             []
         ]
     },
     {
-        "id": "19d141e1644cd53d",
+        "id": "b2ac42aea3aecc3a",
         "type": "function",
         "z": "4c0973556f015184",
         "name": "Formatear Gráfico (por Turno)",
-        "func": "// msg.payload = { turno: 1, meta: X, real: Y, ... }\nlet p = msg.payload;\nlet category = `T${p.turno}`; // La etiqueta para el eje X, ej: \"T1\"\n\n// Mensaje para la barra \"Real\"\nlet msg_real = {\n    topic: \"Producción Real\",\n    payload: {\n        x: category,\n        y: p.real\n    }\n};\n\n// Mensaje para la barra \"Meta\"\nlet msg_meta = {\n    topic: \"Meta de Turno\",\n    payload: {\n        x: category,\n        y: p.meta\n    }\n};\n\n// Retorna un array de mensajes.\n// El ui-chart los recibirá y los ploteará como dos barras\n// en la misma categoría (ej. \"T1\")\nreturn [msg_real, msg_meta];",
+        "func": "// msg.payload = { turno: 1, meta: X, real: Y, ... }\nlet p = msg.payload;\nlet category = `T${p.turno}`;\n\n// Mensaje para la barra \"Real\"\nlet msg_real = {\n    topic: \"Producción Real\",\n    payload: {\n        x: category,\n        y: p.real\n    }\n};\n\n// Mensaje para la barra \"Meta\"\nlet msg_meta = {\n    topic: \"Meta de Turno\",\n    payload: {\n        x: category,\n        y: p.meta\n    }\n};\n\nreturn [msg_real, msg_meta];",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 800,
+        "x": 2080,
         "y": 300,
         "wires": [
             [
-                "90cf93502612e982"
+                "69bbb77977ee39c5"
             ]
         ]
     },
     {
-        "id": "24d16209885cf00b",
+        "id": "07c5e12ae027cc35",
         "type": "inject",
         "z": "4c0973556f015184",
         "name": "Establecer Defaults (Deploy)",
@@ -907,17 +930,17 @@
         "topic": "",
         "payload": "true",
         "payloadType": "bool",
-        "x": 120,
+        "x": 1400,
         "y": 420,
         "wires": [
             [
-                "acd7655b9f6b5d72",
-                "58f6a4109aacd6f2"
+                "63d45766c90b49ff",
+                "db58d43ba15056b4"
             ]
         ]
     },
     {
-        "id": "acd7655b9f6b5d72",
+        "id": "63d45766c90b49ff",
         "type": "change",
         "z": "4c0973556f015184",
         "name": "Default Staffing: 3",
@@ -935,16 +958,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 420,
+        "x": 1700,
         "y": 400,
         "wires": [
             [
-                "02b387f7ba29be58"
+                "82862e14345a3448"
             ]
         ]
     },
     {
-        "id": "58f6a4109aacd6f2",
+        "id": "db58d43ba15056b4",
         "type": "change",
         "z": "4c0973556f015184",
         "name": "Default Meta: 5",
@@ -962,16 +985,16 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 410,
+        "x": 1690,
         "y": 460,
         "wires": [
             [
-                "3fd6db8bfeee91da"
+                "5a9b74fb2ce4161a"
             ]
         ]
     },
     {
-        "id": "02b387f7ba29be58",
+        "id": "82862e14345a3448",
         "type": "ui-template",
         "z": "4c0973556f015184",
         "group": "082d639628900acd",
@@ -979,25 +1002,25 @@
         "ui": "",
         "name": "Selector de Personal (Staffing)",
         "order": 1,
-        "width": "6",
-        "height": "4",
-        "format": "<style>\n    .staffing-selector-container {\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        padding: 20px 0;\n        width: 100%;\n        gap: 12px;\n        flex-wrap: wrap;\n    }\n\n    .staffing-person-icon {\n        font-size: 2.5em;\n        cursor: pointer;\n        transition: all 0.3s ease-in-out;\n        padding: 15px;\n        border-radius: 12px;\n        background: linear-gradient(145deg, #f0f0f0, #cacaca);\n        box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;\n        position: relative;\n        user-select: none;\n    }\n\n    .staffing-person-icon:not(.active) {\n        filter: grayscale(100%);\n        opacity: 0.4;\n    }\n\n    .staffing-person-icon:not(.active):hover {\n        transform: scale(1.1);\n        opacity: 0.6;\n        box-shadow: 2px 2px 4px #bebebe, -2px -2px 4px #ffffff;\n    }\n\n    .staffing-person-icon.active {\n        background: linear-gradient(145deg, #00bfa5, #009688);\n        box-shadow:\n            0 4px 15px rgba(0, 150, 136, 0.4),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        filter: grayscale(0%);\n        transform: scale(1.05);\n        animation: pulse 2s ease-in-out infinite;\n    }\n\n    .staffing-person-icon.active:hover {\n        transform: scale(1.15);\n        box-shadow:\n            0 6px 20px rgba(0, 150, 136, 0.6),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n    }\n\n    .person-badge {\n        position: absolute;\n        bottom: -5px;\n        right: -5px;\n        background: #FF5722;\n        color: white;\n        font-size: 0.4em;\n        font-weight: bold;\n        border-radius: 50%;\n        width: 1.4em;\n        height: 1.4em;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        border: 2px solid white;\n        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);\n    }\n\n    .staffing-person-icon.active .person-badge {\n        background: #4CAF50;\n    }\n\n    @keyframes pulse {\n\n        0%,\n        100% {\n            box-shadow:\n                0 4px 15px rgba(0, 150, 136, 0.4),\n                inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        }\n\n        50% {\n            box-shadow:\n                0 4px 25px rgba(0, 150, 136, 0.7),\n                inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        }\n    }\n\n    .staffing-label {\n        font-size: 1.1em;\n        font-weight: bold;\n        margin-bottom: 15px;\n        color: #333;\n        text-align: center;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        gap: 10px;\n    }\n\n    .staffing-count {\n        background: linear-gradient(145deg, #009688, #00bfa5);\n        color: white;\n        padding: 8px 20px;\n        border-radius: 20px;\n        font-size: 1.2em;\n        box-shadow: 0 3px 8px rgba(0, 150, 136, 0.4);\n        min-width: 60px;\n        text-align: center;\n    }\n</style>\n\n<div>\n    <div class=\"staffing-label\">\n        👥 Celdas Asignadas:\n        <span class=\"staffing-count\">{{currentStaffing}}/{{maxStaffing}}</span>\n    </div>\n\n    <div class=\"staffing-selector-container\">\n        <span v-for=\"i in maxStaffing\"\n              :key=\"i\"\n              class=\"staffing-person-icon\"\n              :class=\"{ 'active': i <= currentStaffing }\"\n              @click=\"sendStaffing(i)\">\n            👤\n            <span class=\"person-badge\">{{i}}</span>\n        </span>\n    </div>\n</div>\n\n<script>\n    export default {\n        data() {\n            return {\n                currentStaffing: 3,\n                maxStaffing: 6\n            }\n        },\n        \n        watch: {\n            msg: {\n                handler(newMsg) {\n                    if (newMsg && newMsg.payload !== undefined) {\n                        let val = parseInt(newMsg.payload, 10);\n                        if (!isNaN(val) && val >= 1 && val <= this.maxStaffing) {\n                            this.currentStaffing = val;\n                        }\n                    }\n                    \n                    if (newMsg && newMsg.numCeldas !== undefined) {\n                        let numCeldas = parseInt(newMsg.numCeldas, 10);\n                        if (!isNaN(numCeldas) && numCeldas > 0) {\n                            this.maxStaffing = numCeldas;\n                            if (this.currentStaffing > numCeldas) {\n                                this.currentStaffing = numCeldas;\n                                this.sendStaffing(numCeldas);\n                            }\n                        }\n                    }\n                },\n                deep: true\n            }\n        },\n        \n        mounted() {\n            this.sendStaffing(this.currentStaffing);\n        },\n        \n        methods: {\n            sendStaffing(count) {\n                this.currentStaffing = count;\n                // Enviar con topic para identificar el mensaje\n                this.send({ \n                    payload: count,\n                    topic: 'staffing',\n                    staffing: count\n                });\n            }\n        }\n    }\n</script>",
+        "width": "0",
+        "height": "0",
+        "format": "<style>\n    .staffing-selector-container {\n        display: flex;\n        justify-content: center;\n        align-items: center;\n        padding: 20px 0;\n        width: 100%;\n        gap: 12px;\n        flex-wrap: wrap;\n    }\n\n    .staffing-person-icon {\n        font-size: 2.5em;\n        cursor: pointer;\n        transition: all 0.3s ease-in-out;\n        padding: 15px;\n        border-radius: 12px;\n        background: linear-gradient(145deg, #f0f0f0, #cacaca);\n        box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;\n        position: relative;\n        user-select: none;\n    }\n\n    .staffing-person-icon:not(.active) {\n        filter: grayscale(100%);\n        opacity: 0.4;\n    }\n\n    .staffing-person-icon:not(.active):hover {\n        transform: scale(1.1);\n        opacity: 0.6;\n        box-shadow: 2px 2px 4px #bebebe, -2px -2px 4px #ffffff;\n    }\n\n    .staffing-person-icon.active {\n        background: linear-gradient(145deg, #00bfa5, #009688);\n        box-shadow:\n            0 4px 15px rgba(0, 150, 136, 0.4),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        filter: grayscale(0%);\n        transform: scale(1.05);\n        animation: pulse 2s ease-in-out infinite;\n    }\n\n    .staffing-person-icon.active:hover {\n        transform: scale(1.15);\n        box-shadow:\n            0 6px 20px rgba(0, 150, 136, 0.6),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n    }\n\n    .person-badge {\n        position: absolute;\n        bottom: -5px;\n        right: -5px;\n        background: #FF5722;\n        color: white;\n        font-size: 0.4em;\n        font-weight: bold;\n        border-radius: 50%;\n        width: 1.4em;\n        height: 1.4em;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        border: 2px solid white;\n        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);\n    }\n\n    .staffing-person-icon.active .person-badge {\n        background: #4CAF50;\n    }\n\n    @keyframes pulse {\n\n        0%,\n        100% {\n            box-shadow:\n                0 4px 15px rgba(0, 150, 136, 0.4),\n                inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        }\n\n        50% {\n            box-shadow:\n                0 4px 25px rgba(0, 150, 136, 0.7),\n                inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        }\n    }\n\n    .staffing-label {\n        font-size: 1.1em;\n        font-weight: bold;\n        margin-bottom: 15px;\n        color: #333;\n        text-align: center;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        gap: 10px;\n    }\n\n    .staffing-count {\n        background: linear-gradient(145deg, #009688, #00bfa5);\n        color: white;\n        padding: 8px 20px;\n        border-radius: 20px;\n        font-size: 1.2em;\n        box-shadow: 0 3px 8px rgba(0, 150, 136, 0.4);\n        min-width: 60px;\n        text-align: center;\n    }\n</style>\n\n<div>\n    <div class=\"staffing-label\">\n        👥 Celdas Asignadas:\n        <span class=\"staffing-count\">{{currentStaffing}}/{{maxStaffing}}</span>\n    </div>\n\n    <div class=\"staffing-selector-container\">\n        <span v-for=\"i in maxStaffing\"\n              :key=\"i\"\n              class=\"staffing-person-icon\"\n              :class=\"{ 'active': i <= currentStaffing }\"\n              @click=\"sendStaffing(i)\">\n            👤\n            <span class=\"person-badge\">{{i}}</span>\n        </span>\n    </div>\n</div>\n\n<script>\n    export default {\n        data() {\n            return {\n                currentStaffing: 3,\n                maxStaffing: 6\n            }\n        },\n        \n        watch: {\n            msg: {\n                handler(newMsg) {\n                    if (newMsg && newMsg.payload !== undefined) {\n                        let val = parseInt(newMsg.payload, 10);\n                        if (!isNaN(val) && val >= 1 && val <= this.maxStaffing) {\n                            this.currentStaffing = val;\n                        }\n                    }\n                    \n                    if (newMsg && newMsg.numCeldas !== undefined) {\n                        let numCeldas = parseInt(newMsg.numCeldas, 10);\n                        if (!isNaN(numCeldas) && numCeldas > 0) {\n                            this.maxStaffing = numCeldas;\n                            if (this.currentStaffing > numCeldas) {\n                                this.currentStaffing = numCeldas;\n                                this.sendStaffing(numCeldas);\n                            }\n                        }\n                    }\n                },\n                deep: true\n            }\n        },\n        \n        mounted() {\n            this.sendStaffing(this.currentStaffing);\n        },\n        \n        methods: {\n            sendStaffing(count) {\n                this.currentStaffing = count;\n                this.send({ \n                    payload: count,\n                    topic: 'staffing',\n                    staffing: count\n                });\n            }\n        }\n    }\n</script>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 710,
+        "x": 1990,
         "y": 400,
         "wires": [
             [
-                "958c809fe5cc5216",
-                "7fea95812d6d9e21"
+                "6e39912e9d42d1eb",
+                "d8048441e5e51ffb"
             ]
         ]
     },
     {
-        "id": "3fd6db8bfeee91da",
+        "id": "5a9b74fb2ce4161a",
         "type": "ui-template",
         "z": "4c0973556f015184",
         "group": "082d639628900acd",
@@ -1005,24 +1028,24 @@
         "ui": "",
         "name": "Meta por hora",
         "order": 2,
-        "width": "6",
-        "height": "4",
-        "format": "<style>\n    .meta-container {\n        padding: 20px;\n        background: white;\n        border-radius: 16px;\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);\n    }\n\n    .meta-header {\n        text-align: center;\n        margin-bottom: 20px;\n    }\n\n    .meta-label {\n        font-size: 1.1em;\n        font-weight: bold;\n        color: #333;\n        margin-bottom: 10px;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        gap: 10px;\n    }\n\n    .meta-value-display {\n        background: linear-gradient(145deg, #FF6B6B, #EE5A6F);\n        color: white;\n        padding: 12px 30px;\n        border-radius: 25px;\n        font-size: 2em;\n        font-weight: bold;\n        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);\n        display: inline-block;\n        font-family: 'Courier New', monospace;\n        animation: pulse-value 2s ease-in-out infinite;\n    }\n\n    @keyframes pulse-value {\n        0%, 100% {\n            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);\n        }\n        50% {\n            box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);\n        }\n    }\n\n    .meta-subtitle {\n        font-size: 0.9em;\n        color: #666;\n        margin-top: 8px;\n        font-weight: 600;\n    }\n\n    .meta-buttons-grid {\n        display: grid;\n        grid-template-columns: repeat(5, 1fr);\n        gap: 10px;\n        margin-top: 20px;\n    }\n\n    .meta-button {\n        background: linear-gradient(145deg, #f0f0f0, #e0e0e0);\n        border: 2px solid transparent;\n        border-radius: 12px;\n        padding: 15px 10px;\n        font-size: 1.3em;\n        font-weight: bold;\n        color: #666;\n        cursor: pointer;\n        transition: all 0.3s ease;\n        box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;\n        user-select: none;\n        position: relative;\n    }\n\n    .meta-button:hover:not(.active) {\n        transform: translateY(-2px);\n        box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;\n        color: #333;\n    }\n\n    .meta-button.active {\n        background: linear-gradient(145deg, #FF6B6B, #EE5A6F);\n        color: white;\n        border-color: #EE5A6F;\n        box-shadow: \n            0 6px 20px rgba(255, 107, 107, 0.5),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        transform: scale(1.08);\n    }\n\n    .meta-button.active::after {\n        content: '✓';\n        position: absolute;\n        top: -5px;\n        right: -5px;\n        background: #4CAF50;\n        color: white;\n        font-size: 0.6em;\n        border-radius: 50%;\n        width: 1.2em;\n        height: 1.2em;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        border: 2px solid white;\n        box-shadow: 0 2px 4px rgba(0,0,0,0.3);\n    }\n\n    .meta-button.active:hover {\n        transform: scale(1.12);\n    }\n\n    .meta-quick-select {\n        display: flex;\n        justify-content: center;\n        gap: 10px;\n        margin-top: 20px;\n        padding-top: 20px;\n        border-top: 2px solid #e0e0e0;\n    }\n\n    .quick-select-btn {\n        background: linear-gradient(145deg, #6c757d, #5a6268);\n        color: white;\n        border: none;\n        border-radius: 20px;\n        padding: 10px 20px;\n        font-size: 0.9em;\n        font-weight: 600;\n        cursor: pointer;\n        transition: all 0.3s ease;\n        box-shadow: 0 3px 8px rgba(108, 117, 125, 0.3);\n        display: flex;\n        align-items: center;\n        gap: 5px;\n    }\n\n    .quick-select-btn:hover {\n        transform: translateY(-2px);\n        box-shadow: 0 5px 12px rgba(108, 117, 125, 0.5);\n        background: linear-gradient(145deg, #5a6268, #495057);\n    }\n\n    .meta-info {\n        margin-top: 15px;\n        padding: 12px 15px;\n        background: linear-gradient(135deg, #fff3e0, #ffe0b2);\n        border-radius: 10px;\n        font-size: 0.9em;\n        color: #e65100;\n        border-left: 4px solid #FF6B6B;\n        font-weight: 600;\n    }\n\n    @media (max-width: 768px) {\n        .meta-buttons-grid {\n            grid-template-columns: repeat(4, 1fr);\n        }\n    }\n</style>\n\n<div class=\"meta-container\">\n    <div class=\"meta-header\">\n        <div class=\"meta-label\">\n            🎯 Meta por Hora (por celda)\n        </div>\n        <div class=\"meta-value-display\">{{metaHora}}</div>\n        <div class=\"meta-subtitle\">unidades/hora/celda</div>\n    </div>\n\n    <div class=\"meta-buttons-grid\">\n        <button \n            v-for=\"n in 20\" \n            :key=\"n\"\n            class=\"meta-button\"\n            :class=\"{ 'active': n === metaHora }\"\n            @click=\"setMeta(n)\">\n            {{n}}\n        </button>\n    </div>\n\n    <div class=\"meta-quick-select\">\n        <button class=\"quick-select-btn\" @click=\"setMeta(3)\">\n            <span>🐌</span> Baja (3)\n        </button>\n        <button class=\"quick-select-btn\" @click=\"setMeta(5)\">\n            <span>⚡</span> Media (5)\n        </button>\n        <button class=\"quick-select-btn\" @click=\"setMeta(10)\">\n            <span>⚙️</span> Alta (10)\n        </button>\n        <button class=\"quick-select-btn\" @click=\"setMeta(15)\">\n            <span>🚀</span> Extrema (15)\n        </button>\n    </div>\n\n    <div class=\"meta-info\">\n        💡 <strong>Meta Total:</strong> {{metaHora}} × {{staffing}} celdas = <strong>{{metaHora * staffing}} unidades/hora</strong>\n    </div>\n</div>\n\n<script>\n    export default {\n        data() {\n            return {\n                metaHora: 5,\n                staffing: 5\n            }\n        },\n        \n        watch: {\n            msg: {\n                handler(newMsg) {\n                    // Actualizar meta desde mensajes entrantes\n                    if (newMsg && newMsg.payload !== undefined && newMsg.topic !== 'staffing') {\n                        let val = parseInt(newMsg.payload, 10);\n                        if (!isNaN(val) && val >= 1 && val <= 20) {\n                            this.metaHora = val;\n                        }\n                    }\n                    \n                    // Actualizar staffing (viene del selector de personal)\n                    if (newMsg && newMsg.staffing !== undefined) {\n                        this.staffing = parseInt(newMsg.staffing, 10);\n                    }\n                },\n                deep: true,\n                immediate: true\n            }\n        },\n        \n        mounted() {\n            this.send({ payload: this.metaHora });\n        },\n        \n        methods: {\n            setMeta(value) {\n                if (value >= 1 && value <= 20) {\n                    this.metaHora = value;\n                    this.send({ \n                        payload: value,\n                        topic: 'meta'\n                    });\n                }\n            }\n        }\n    }\n</script>",
+        "width": "0",
+        "height": "0",
+        "format": "<style>\n    .meta-container {\n        padding: 20px;\n        background: white;\n        height: 450px;\n        border-radius: 16px;\n        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);\n    }\n\n    .meta-header {\n        text-align: center;\n        margin-bottom: 20px;\n    }\n\n    .meta-label {\n        font-size: 1.1em;\n        font-weight: bold;\n        color: #333;\n        margin-bottom: 10px;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        gap: 10px;\n    }\n\n    .meta-value-display {\n        background: linear-gradient(145deg, #FF6B6B, #EE5A6F);\n        color: white;\n        padding: 12px 30px;\n        border-radius: 25px;\n        font-size: 2em;\n        font-weight: bold;\n        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);\n        display: inline-block;\n        font-family: 'Courier New', monospace;\n        animation: pulse-value 2s ease-in-out infinite;\n    }\n\n    @keyframes pulse-value {\n        0%, 100% {\n            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);\n        }\n        50% {\n            box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);\n        }\n    }\n\n    .meta-subtitle {\n        font-size: 0.9em;\n        color: #666;\n        margin-top: 8px;\n        font-weight: 600;\n    }\n\n    .meta-buttons-grid {\n        display: grid;\n        grid-template-columns: repeat(5, 1fr);\n        gap: 10px;\n        margin-top: 20px;\n    }\n\n    .meta-button {\n        background: linear-gradient(145deg, #f0f0f0, #e0e0e0);\n        border: 2px solid transparent;\n        border-radius: 12px;\n        padding: 15px 10px;\n        font-size: 1.3em;\n        font-weight: bold;\n        color: #666;\n        cursor: pointer;\n        transition: all 0.3s ease;\n        box-shadow: 3px 3px 6px #bebebe, -3px -3px 6px #ffffff;\n        user-select: none;\n        position: relative;\n    }\n\n    .meta-button:hover:not(.active) {\n        transform: translateY(-2px);\n        box-shadow: 4px 4px 8px #bebebe, -4px -4px 8px #ffffff;\n        color: #333;\n    }\n\n    .meta-button.active {\n        background: linear-gradient(145deg, #FF6B6B, #EE5A6F);\n        color: white;\n        border-color: #EE5A6F;\n        box-shadow: \n            0 6px 20px rgba(255, 107, 107, 0.5),\n            inset 0 1px 3px rgba(255, 255, 255, 0.3);\n        transform: scale(1.08);\n    }\n\n    .meta-button.active::after {\n        content: '✓';\n        position: absolute;\n        top: -5px;\n        right: -5px;\n        background: #4CAF50;\n        color: white;\n        font-size: 0.6em;\n        border-radius: 50%;\n        width: 1.2em;\n        height: 1.2em;\n        display: flex;\n        align-items: center;\n        justify-content: center;\n        border: 2px solid white;\n        box-shadow: 0 2px 4px rgba(0,0,0,0.3);\n    }\n\n    .meta-button.active:hover {\n        transform: scale(1.12);\n    }\n\n    .meta-quick-select {\n        display: flex;\n        justify-content: center;\n        gap: 10px;\n        margin-top: 20px;\n        padding-top: 20px;\n        border-top: 2px solid #e0e0e0;\n    }\n\n    .quick-select-btn {\n        background: linear-gradient(145deg, #6c757d, #5a6268);\n        color: white;\n        border: none;\n        border-radius: 20px;\n        padding: 10px 20px;\n        font-size: 0.9em;\n        font-weight: 600;\n        cursor: pointer;\n        transition: all 0.3s ease;\n        box-shadow: 0 3px 8px rgba(108, 117, 125, 0.3);\n        display: flex;\n        align-items: center;\n        gap: 5px;\n    }\n\n    .quick-select-btn:hover {\n        transform: translateY(-2px);\n        box-shadow: 0 5px 12px rgba(108, 117, 125, 0.5);\n        background: linear-gradient(145deg, #5a6268, #495057);\n    }\n\n    .meta-info {\n        margin-top: 15px;\n        padding: 12px 15px;\n        background: linear-gradient(135deg, #fff3e0, #ffe0b2);\n        border-radius: 10px;\n        font-size: 0.9em;\n        color: #e65100;\n        border-left: 4px solid #FF6B6B;\n        font-weight: 600;\n    }\n\n    @media (max-width: 768px) {\n        .meta-buttons-grid {\n            grid-template-columns: repeat(4, 1fr);\n        }\n    }\n</style>\n\n<div class=\"meta-container\">\n    <div class=\"meta-header\">\n        <div class=\"meta-label\">\n            🎯 Meta por Hora (por celda)\n        </div>\n        <div class=\"meta-value-display\">{{metaHora}}</div>\n        <div class=\"meta-subtitle\">unidades/hora/celda</div>\n    </div>\n\n    <div class=\"meta-buttons-grid\">\n        <button \n            v-for=\"n in 10\" \n            :key=\"n\"\n            class=\"meta-button\"\n            :class=\"{ 'active': n === metaHora }\"\n            @click=\"setMeta(n)\">\n            {{n}}\n        </button>\n    </div>\n\n    <div class=\"meta-quick-select\">\n        <button class=\"quick-select-btn\" @click=\"setMeta(3)\">\n            <span>🐌</span> Baja (3)\n        </button>\n        <button class=\"quick-select-btn\" @click=\"setMeta(5)\">\n            <span>⚡</span> Media (5)\n        </button>\n        <button class=\"quick-select-btn\" @click=\"setMeta(10)\">\n            <span>⚙️</span> Alta (10)\n        </button>\n    </div>\n\n    <div class=\"meta-info\">\n        💡 <strong>Meta Total:</strong> {{metaHora}} × {{staffing}} celdas = <strong>{{metaHora * staffing}} unidades/hora</strong>\n    </div>\n</div>\n\n<script>\n    export default {\n        data() {\n            return {\n                metaHora: 5,\n                staffing: 5\n            }\n        },\n        \n        watch: {\n            msg: {\n                handler(newMsg) {\n                    if (newMsg && newMsg.payload !== undefined && newMsg.topic !== 'staffing') {\n                        let val = parseInt(newMsg.payload, 10);\n                        if (!isNaN(val) && val >= 1 && val <= 20) {\n                            this.metaHora = val;\n                        }\n                    }\n                    \n                    if (newMsg && newMsg.staffing !== undefined) {\n                        this.staffing = parseInt(newMsg.staffing, 10);\n                    }\n                },\n                deep: true,\n                immediate: true\n            }\n        },\n        \n        mounted() {\n            this.send({ payload: this.metaHora });\n        },\n        \n        methods: {\n            setMeta(value) {\n                if (value >= 1 && value <= 20) {\n                    this.metaHora = value;\n                    this.send({ \n                        payload: value,\n                        topic: 'meta'\n                    });\n                }\n            }\n        }\n    }\n</script>",
         "storeOutMessages": true,
         "passthru": true,
         "resendOnRefresh": true,
         "templateScope": "local",
         "className": "",
-        "x": 700,
+        "x": 1980,
         "y": 520,
         "wires": [
             [
-                "dc83e430062df731"
+                "3cacfdc23936e48c"
             ]
         ]
     },
     {
-        "id": "7fea95812d6d9e21",
+        "id": "d8048441e5e51ffb",
         "type": "function",
         "z": "4c0973556f015184",
         "name": "function 1",
@@ -1033,35 +1056,12 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 680,
+        "x": 1960,
         "y": 460,
         "wires": [
             [
-                "3fd6db8bfeee91da"
+                "5a9b74fb2ce4161a"
             ]
-        ]
-    },
-    {
-        "id": "74e87c149faf9999",
-        "type": "ui-template",
-        "z": "4c0973556f015184",
-        "group": "6e18838a8ce84c0b",
-        "page": "",
-        "ui": "",
-        "name": "Grid de Celdas (Proceso Textil)",
-        "order": 2,
-        "width": 0,
-        "height": 0,
-        "format": "<style>\n    .grid-container {\n        display: grid;\n        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));\n        gap: 15px;\n        padding: 20px;\n        background: #f8fafc;\n        border-radius: 12px;\n    }\n    .celda {\n        border: 1px solid #e2e8f0;\n        border-radius: 12px;\n        padding: 15px;\n        text-align: center;\n        color: #2d3748;\n        transition: all 0.3s ease;\n        background: white;\n        box-shadow: 0 2px 8px rgba(0,0,0,0.08);\n        position: relative;\n        overflow: hidden;\n    }\n    .celda::before {\n        content: '';\n        position: absolute;\n        top: 0;\n        left: 0;\n        right: 0;\n        height: 4px;\n    }\n    .celda-title {\n        font-weight: 700;\n        font-size: 1.1em;\n        margin-bottom: 12px;\n        padding-bottom: 8px;\n        border-bottom: 2px solid #f1f5f9;\n        color: #1e293b;\n    }\n    .celda-kpi {\n        font-size: 0.85em;\n        text-align: left;\n        margin-top: 6px;\n        display: flex;\n        justify-content: space-between;\n        align-items: center;\n    }\n    .celda-kpi b {\n        color: #64748b;\n        font-weight: 600;\n    }\n    \n    /* Estados con colores modernos */\n    .celda-estado-trabajando::before { background: linear-gradient(135deg, #10b981, #059669); }\n    .celda-estado-trabajando { border-top: 4px solid #10b981; }\n    \n    .celda-estado-parada::before { background: linear-gradient(135deg, #ef4444, #dc2626); }\n    .celda-estado-parada { border-top: 4px solid #ef4444; }\n    \n    .celda-estado-esperando::before { background: linear-gradient(135deg, #f59e0b, #d97706); }\n    .celda-estado-esperando { border-top: 4px solid #f59e0b; }\n    \n    .celda-estado-sin_personal::before { background: linear-gradient(135deg, #6b7280, #4b5563); }\n    .celda-estado-sin_personal { border-top: 4px solid #6b7280; }\n\n    /* Barra de utilización mejorada */\n    .util-bar-container {\n        background-color: #e2e8f0;\n        border-radius: 8px;\n        height: 16px;\n        width: 100%;\n        margin-top: 8px;\n        border: 1px solid #cbd5e1;\n        overflow: hidden;\n        position: relative;\n    }\n    .util-bar-value {\n        background: linear-gradient(135deg, #3b82f6, #1d4ed8);\n        height: 100%;\n        transition: width 0.5s ease;\n        border-radius: 6px;\n    }\n    \n    /* Imágenes de estado mejoradas */\n    .estado-imagen {\n        width: 48px;\n        height: 48px;\n        margin: 0 auto 10px auto;\n        background-size: contain;\n        background-repeat: no-repeat;\n        background-position: center;\n        filter: brightness(0.9);\n    }\n    .imagen-trabajando { background-image: url('https://cdn-icons-png.flaticon.com/512/3064/3064039.png'); }\n    .imagen-parada { background-image: url('https://cdn-icons-png.flaticon.com/512/458/458594.png'); }\n    .imagen-esperando { background-image: url('https://cdn-icons-png.flaticon.com/512/3305/3305803.png'); }\n    .imagen-sin_personal { background-image: url('https://cdn-icons-png.flaticon.com/512/1828/1828843.png'); }\n    \n    .estado-texto {\n        font-size: 0.75em;\n        font-weight: 700;\n        margin-bottom: 8px;\n        padding: 4px 8px;\n        border-radius: 6px;\n        text-transform: uppercase;\n        letter-spacing: 0.5px;\n    }\n    .estado-trabajando { background: #d1fae5; color: #065f46; }\n    .estado-parada { background: #fee2e2; color: #991b1b; }\n    .estado-esperando { background: #fef3c7; color: #92400e; }\n    .estado-sin_personal { background: #f1f5f9; color: #374151; }\n    \n    .valor-destacado {\n        font-weight: 700;\n        color: #1e293b;\n        font-family: 'Courier New', monospace;\n    }\n</style>\n\n<div class=\"grid-container\">\n    <div v-for=\"celda in msg.payload\" :key=\"celda.id\" class=\"celda\" :class=\"'celda-estado-' + celda.estado\">\n        <div class=\"celda-title\">Celda {{celda.id}}</div>\n        \n        <!-- Imagen representativa del estado -->\n        <div class=\"estado-imagen\" :class=\"'imagen-' + celda.estado\"></div>\n        <div class=\"estado-texto\" :class=\"'estado-' + celda.estado\">{{celda.estado.toUpperCase()}}</div>\n        \n        <div class=\"celda-kpi\">\n            <b>Prod/h:</b>\n            <span class=\"valor-destacado\">{{celda.unid_ok_hora}}</span>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Util:</b>\n            <span class=\"valor-destacado\">{{celda.utilizacion.toFixed(1)}}%</span>\n        </div>\n        <div class=\"util-bar-container\">\n            <div class=\"util-bar-value\" :style=\"{ width: celda.utilizacion.toFixed(1) + '%' }\"></div>\n        </div>\n        \n        <div class=\"celda-kpi\">\n            <b>Espera:</b>\n            <span class=\"valor-destacado\">{{celda.tiempo_espera}}h</span>\n        </div>\n    </div>\n</div>",
-        "storeOutMessages": true,
-        "passthru": true,
-        "resendOnRefresh": true,
-        "templateScope": "local",
-        "className": "",
-        "x": 858.265625,
-        "y": 90.76171875,
-        "wires": [
-            []
         ]
     }
 ]
