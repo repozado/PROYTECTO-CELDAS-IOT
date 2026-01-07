@@ -542,7 +542,7 @@
         "height": "4",
         "className": "grafic-modern",
         "interpolation": "linear",
-        "x": 740,
+        "x": 760,
         "y": 140,
         "wires": [
             []
